@@ -7,19 +7,20 @@
   <link rel="stylesheet" href="../styles/base.css">
   <link rel="stylesheet" href="../styles/components.css">
   <style>
-    /* ─── Canvas dark theme tokens ─────────────────────── */
+    /* ─── Canvas light theme tokens ────────────────────── */
     :root {
-      --cv-bg:        #1c1c1e;
-      --cv-surface:   #242424;
-      --cv-toolbar:   #2a2a2a;
-      --cv-border:    #3a3a3a;
-      --cv-text:      #e8e8e6;
-      --cv-muted:     #8a8a88;
-      --cv-hover:     rgba(255,255,255,0.06);
-      --cv-active:    rgba(55,138,221,0.12);
-      --cv-accent:    #378ADD;
+      --cv-bg:        #f0f3f7;
+      --cv-surface:   #ffffff;
+      --cv-toolbar:   #f0f3f7;
+      --cv-border:    #dee2e6;
+      --cv-text:      #212529;
+      --cv-muted:     #6c757d;
+      --cv-hover:     #e8edf4;
+      --cv-active:    #e8edf4;
+      --cv-accent:    #124680;
       --cv-panel-w:   240px;
       --cv-panel-rw:  280px;
+      --cv-toolbar-h: 44px;
     }
 
     /* ─── App shell & sidebar ───────────────────────────── */
@@ -69,7 +70,7 @@
     .img-list { flex:1; overflow-y:auto; padding:4px 0; }
     .img-list-item { display:flex; align-items:center; gap:8px; padding:6px 12px; cursor:pointer; transition:background 150ms; border-left:2px solid transparent; }
     .img-list-item:hover { background:var(--cv-hover); }
-    .img-list-item.active { background:rgba(55,138,221,0.10); border-left-color:var(--cv-accent); }
+    .img-list-item.active { background:var(--cv-active); border-left-color:var(--cv-accent); }
     .img-thumb { width:44px; height:33px; border-radius:3px; background:var(--cv-toolbar); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .img-thumb svg { width:18px; height:18px; color:var(--cv-muted); }
     .img-list-item__name { font-size:11px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -84,7 +85,7 @@
     /* Canvas */
     .canvas-area { flex:1; display:flex; flex-direction:column; background:var(--cv-bg); overflow:hidden; }
     .canvas-viewport { flex:1; display:flex; align-items:center; justify-content:center; position:relative; cursor:default; overflow:hidden; }
-    .read-only-banner { position:absolute; top:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.55); color:var(--cv-muted); font-size:11px; padding:4px 12px; border-radius:12px; z-index:10; pointer-events:none; border:1px solid var(--cv-border); }
+    .read-only-banner { position:absolute; top:12px; left:50%; transform:translateX(-50%); background:rgba(255,255,255,0.88); color:var(--cv-muted); font-size:11px; padding:4px 12px; border-radius:12px; z-index:10; pointer-events:none; border:1px solid var(--cv-border); backdrop-filter:blur(4px); }
     .mock-image { width:640px; height:480px; background:var(--cv-bg); border:1px solid var(--cv-border); position:relative; overflow:hidden; }
     .mock-image::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,#141416 0%,#1a1e20 20%,#131618 40%,#181e14 60%,#141620 80%,#0e1010 100%); }
     .bbox { position:absolute; border:2px solid; }
@@ -114,14 +115,48 @@
     .ebtn svg { width:13px; height:13px; }
     .ebtn-secondary { background:var(--cv-toolbar); border-color:var(--cv-border); }
     .ebtn-secondary:hover { background:var(--cv-hover); }
-    .ebtn-approve { background:rgba(39,174,96,0.15); border-color:rgba(39,174,96,0.3); color:#5dd68a; }
-    .ebtn-approve:hover { background:rgba(39,174,96,0.25); }
-    .ebtn-reject { background:rgba(231,76,60,0.12); border-color:rgba(231,76,60,0.28); color:#f87171; }
-    .ebtn-reject:hover { background:rgba(231,76,60,0.22); }
+    .ebtn-approve { background:rgba(39,174,96,0.10); border-color:rgba(39,174,96,0.35); color:#16a34a; }
+    .ebtn-approve:hover { background:rgba(39,174,96,0.18); }
+    .ebtn-reject { background:rgba(220,38,38,0.07); border-color:rgba(220,38,38,0.28); color:#dc2626; }
+    .ebtn-reject:hover { background:rgba(220,38,38,0.14); }
 
     ::-webkit-scrollbar { width:4px; }
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--cv-border); border-radius:2px; }
+
+    /* ─── Editor toolbar ────────────────────────────────── */
+    .editor-toolbar { height:var(--cv-toolbar-h); background:var(--cv-toolbar); border-bottom:1px solid var(--cv-border); display:flex; align-items:center; gap:2px; padding:0 12px; flex-shrink:0; }
+    .toolbar-right { margin-left:auto; display:flex; align-items:center; gap:4px; }
+    .tool-sep { width:1px; height:22px; background:var(--cv-border); margin:0 4px; }
+    .tool-btn { width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:4px; background:none; border:1px solid transparent; color:var(--cv-muted); cursor:pointer; position:relative; transition:all 150ms; }
+    .tool-btn:hover { background:var(--cv-hover); color:var(--cv-text); }
+    .tool-btn svg { width:16px; height:16px; }
+    [data-tooltip] { position:relative; }
+    [data-tooltip]:hover::after { content:attr(data-tooltip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:#000; color:white; font-size:11px; padding:4px 8px; border-radius:4px; white-space:nowrap; pointer-events:none; z-index:100; }
+
+    /* ─── Fullscreen + focus mode ───────────────────────── */
+    .app-shell.is-fullscreen .sidebar { display: none; }
+    .app-shell.is-fullscreen .topbar  { display: none; }
+    .app-shell.is-fullscreen .editor-body { height: 100vh; }
+    .editor-body.is-focus .panel-left  { display: none; }
+    .editor-body.is-focus .panel-right { display: none; }
+
+    /* ─── Filter tabs ───────────────────────────────────── */
+    .img-filter { display:flex; gap:3px; padding:6px 8px; border-bottom:1px solid var(--cv-border); flex-shrink:0; }
+    .img-filter-btn { flex:1; padding:3px 0; font-size:10px; font-weight:600; letter-spacing:.03em; background:none; border:1px solid transparent; border-radius:3px; color:var(--cv-muted); cursor:pointer; transition:all 120ms; }
+    .img-filter-btn:hover { color:var(--cv-text); background:var(--cv-hover); }
+    .img-filter-btn.active { background:var(--cv-active); color:var(--cv-text); border-color:var(--cv-border); }
+
+    /* ─── Selection / bulk mode ─────────────────────────── */
+    .img-list-item .sel-cb { width:14px; height:14px; accent-color:var(--cv-accent); cursor:pointer; flex-shrink:0; display:none; }
+    .img-list.selection-mode .img-list-item .sel-cb { display:block; }
+    .img-list-item.sel-checked { background:var(--cv-active) !important; }
+    .bulk-bar { display:none; flex-direction:column; gap:6px; border-top:1px solid var(--cv-border); padding:8px 12px; flex-shrink:0; }
+    .bulk-bar.visible { display:flex; }
+
+    /* ─── Cheatsheet ────────────────────────────────────── */
+    .panel-block { border-bottom:1px solid var(--cv-border); }
+    .panel-block-hd { padding:8px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--cv-muted); background:var(--cv-toolbar); display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--cv-border); }
   </style>
 </head>
 <body>
@@ -148,12 +183,14 @@
       </div>
       <div class="topbar-right">
         <span class="batch-count">12 / 24 ảnh</span>
-        <button class="btn btn-secondary btn-sm" onclick="showToast('Ảnh trước')">
+        <button class="btn btn-secondary btn-sm" onclick="navigateImage(-1)" title="Ảnh trước (← / ↑)">
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           Trước
+          <kbd style="margin-left:2px;font-size:10px;font-weight:500;opacity:0.55;background:rgba(0,0,0,0.07);border-radius:3px;padding:1px 4px;font-family:inherit;">←</kbd>
         </button>
-        <button class="btn btn-secondary btn-sm" onclick="showToast('Ảnh tiếp theo')">
+        <button class="btn btn-secondary btn-sm" onclick="navigateImage(1)" title="Ảnh tiếp (→ / ↓)">
           Tiếp
+          <kbd style="margin-left:2px;font-size:10px;font-weight:500;opacity:0.55;background:rgba(0,0,0,0.07);border-radius:3px;padding:1px 4px;font-family:inherit;">→</kbd>
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
@@ -164,9 +201,27 @@
 
       <!-- Left Panel -->
       <aside class="panel-left">
-        <div class="panel-section-header"><span>Batch review</span><span style="color:var(--cv-text);">24</span></div>
-        <div class="img-list">
-          <div class="img-list-item">
+        <div class="panel-section-header">
+          <span>Batch review</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span id="reviewCount" style="color:var(--cv-text);font-size:11px;font-weight:400;">5 / 5</span>
+            <button id="btnSelectMode" onclick="toggleSelectionMode()" title="Chọn nhiều ảnh để duyệt hàng loạt"
+              style="background:none;border:1px solid var(--cv-border);border-radius:3px;padding:1px 7px;font-size:10px;font-weight:600;color:var(--cv-muted);cursor:pointer;transition:all 120ms;font-family:inherit;">
+              Chọn
+            </button>
+          </div>
+        </div>
+
+        <div class="img-filter">
+          <button class="img-filter-btn active" onclick="filterReviewImages('all',this)">Tất cả</button>
+          <button class="img-filter-btn" onclick="filterReviewImages('pending',this)">Chờ</button>
+          <button class="img-filter-btn" onclick="filterReviewImages('approved',this)">Duyệt</button>
+          <button class="img-filter-btn" onclick="filterReviewImages('rejected',this)">Trả lại</button>
+        </div>
+
+        <div class="img-list" id="imgList">
+          <div class="img-list-item" data-img="img_0038.jpg" data-status="approved" onclick="selectReviewImage(this.dataset.img)">
+            <input type="checkbox" class="sel-cb" onclick="event.stopPropagation()" onchange="toggleItemSelection('img_0038.jpg',this.checked)">
             <div class="img-thumb" style="background:linear-gradient(135deg,#2a3a28,#1e2832);">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </div>
@@ -175,7 +230,8 @@
               <div style="margin-top:2px;"><span class="status-dot approved">Đã duyệt</span></div>
             </div>
           </div>
-          <div class="img-list-item">
+          <div class="img-list-item" data-img="img_0039.jpg" data-status="rejected" onclick="selectReviewImage(this.dataset.img)">
+            <input type="checkbox" class="sel-cb" onclick="event.stopPropagation()" onchange="toggleItemSelection('img_0039.jpg',this.checked)">
             <div class="img-thumb" style="background:linear-gradient(135deg,#3a2a1e,#2a1e18);">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </div>
@@ -184,23 +240,26 @@
               <div style="margin-top:2px;"><span class="status-dot rejected">Trả lại</span></div>
             </div>
           </div>
-          <div class="img-list-item active">
+          <div class="img-list-item active" data-img="img_0042.jpg" data-status="pending" onclick="selectReviewImage(this.dataset.img)">
+            <input type="checkbox" class="sel-cb" onclick="event.stopPropagation()" onchange="toggleItemSelection('img_0042.jpg',this.checked)">
             <div class="img-thumb" style="background:linear-gradient(135deg,#1a2028,#243040);border:1px solid var(--cv-accent);">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--cv-accent)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </div>
             <div style="flex:1;min-width:0;">
               <div class="img-list-item__name" style="color:var(--cv-accent);">img_0042.jpg</div>
               <div style="margin-top:2px;"><span class="status-dot pending">Chờ duyệt</span></div>
             </div>
           </div>
-          <div class="img-list-item">
+          <div class="img-list-item" data-img="img_0043.jpg" data-status="pending" onclick="selectReviewImage(this.dataset.img)">
+            <input type="checkbox" class="sel-cb" onclick="event.stopPropagation()" onchange="toggleItemSelection('img_0043.jpg',this.checked)">
             <div class="img-thumb"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
             <div style="flex:1;min-width:0;">
               <div class="img-list-item__name">img_0043.jpg</div>
               <div style="margin-top:2px;"><span class="status-dot pending">Chờ duyệt</span></div>
             </div>
           </div>
-          <div class="img-list-item">
+          <div class="img-list-item" data-img="img_0044.jpg" data-status="pending" onclick="selectReviewImage(this.dataset.img)">
+            <input type="checkbox" class="sel-cb" onclick="event.stopPropagation()" onchange="toggleItemSelection('img_0044.jpg',this.checked)">
             <div class="img-thumb"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
             <div style="flex:1;min-width:0;">
               <div class="img-list-item__name">img_0044.jpg</div>
@@ -208,20 +267,59 @@
             </div>
           </div>
         </div>
-        <div class="panel-nav">
-          <button class="ebtn ebtn-secondary">
+
+        <!-- Normal nav -->
+        <div id="panelNav" class="panel-nav">
+          <button class="ebtn ebtn-secondary" onclick="navigateImage(-1)" title="Ảnh trước (← / ↑)">
             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
             Trước
+            <kbd style="margin-left:2px;font-size:10px;font-weight:500;opacity:0.55;background:rgba(0,0,0,0.07);border-radius:3px;padding:1px 4px;font-family:inherit;">←</kbd>
           </button>
-          <button class="ebtn ebtn-secondary">
+          <button class="ebtn ebtn-secondary" onclick="navigateImage(1)" title="Ảnh tiếp (→ / ↓)">
             Tiếp
+            <kbd style="margin-left:2px;font-size:10px;font-weight:500;opacity:0.55;background:rgba(0,0,0,0.07);border-radius:3px;padding:1px 4px;font-family:inherit;">→</kbd>
             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
+        </div>
+
+        <!-- Bulk action bar (visible only in selection mode) -->
+        <div id="bulkBar" class="bulk-bar">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span id="bulkInfo" style="font-size:11px;color:var(--cv-muted);">0 ảnh đã chọn</span>
+            <button onclick="selectAllVisible()" style="background:none;border:none;font-size:10px;font-weight:600;color:var(--cv-accent);cursor:pointer;padding:0;font-family:inherit;">Chọn tất cả</button>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="ebtn ebtn-approve" style="flex:1;justify-content:center;" onclick="bulkApprove()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Duyệt (<span class="bulk-count">0</span>)
+            </button>
+            <button class="ebtn ebtn-reject" style="flex:1;justify-content:center;" onclick="bulkReject()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.87"/></svg>
+              Trả lại (<span class="bulk-count">0</span>)
+            </button>
+          </div>
         </div>
       </aside>
 
       <!-- Canvas -->
       <div class="canvas-area">
+        <div class="editor-toolbar">
+          <span id="reviewAnnCount" style="font-size:11px;color:var(--cv-muted);">3 annotations · 2 bbox, 1 polygon</span>
+          <div class="toolbar-right">
+            <button class="ebtn ebtn-secondary" onclick="navigateImage(-1)" style="padding:4px 10px;font-size:11px;" title="Ảnh trước (←)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              Trước
+            </button>
+            <button class="ebtn ebtn-secondary" onclick="navigateImage(1)" style="padding:4px 10px;font-size:11px;" title="Ảnh tiếp (→)">
+              Tiếp
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <div class="tool-sep"></div>
+            <button class="tool-btn" id="btnFullscreen" onclick="toggleFullscreen()" data-tooltip="Toàn màn hình (F)">
+              <svg id="fsIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            </button>
+          </div>
+        </div>
         <div class="canvas-viewport">
           <div class="read-only-banner">
             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -290,16 +388,29 @@
             <div class="review-label">Ghi chú <span style="font-size:10px;font-weight:400;">(bắt buộc khi Trả lại)</span></div>
             <textarea class="review-textarea" id="reviewNote" placeholder="Nhập ghi chú cho annotator..."></textarea>
           </div>
+
+          <div class="panel-block" style="margin-top:8px;">
+            <div class="panel-block-hd">Phím tắt</div>
+            <div style="padding:10px 12px;">
+              <div style="font-size:10px;color:var(--cv-muted);line-height:1.8;">
+                <b style="color:var(--cv-text);">A</b> duyệt · <b style="color:var(--cv-text);">R</b> trả lại<br>
+                <b style="color:var(--cv-text);">←↑→↓</b> chuyển ảnh · <b style="color:var(--cv-text);">Esc</b> thoát chọn<br>
+                <b style="color:var(--cv-text);">F</b> fullscreen · <b style="color:var(--cv-text);">Tab</b> ẩn panel
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="panel-actions">
           <button class="ebtn ebtn-approve" style="justify-content:center;" onclick="handleApprove()">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
             Duyệt
+            <kbd style="margin-left:4px;font-size:10px;font-weight:500;opacity:0.65;background:rgba(255,255,255,0.15);border-radius:3px;padding:1px 4px;font-family:inherit;">A</kbd>
           </button>
           <button class="ebtn ebtn-reject" style="justify-content:center;" onclick="handleReject()">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.87"/></svg>
             Trả lại
+            <kbd style="margin-left:4px;font-size:10px;font-weight:500;opacity:0.65;background:rgba(255,255,255,0.12);border-radius:3px;padding:1px 4px;font-family:inherit;">R</kbd>
           </button>
           <div style="text-align:center;font-size:11px;color:var(--cv-muted);">12 / 24 đã review trong batch</div>
         </div>
@@ -312,29 +423,259 @@
 <div id="toastContainer" style="position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:2000;pointer-events:none;"></div>
 
 <script>
+  // ─── State ─────────────────────────────────────────────────────────────────
+
+  let currentReviewImg = 'img_0042.jpg';
+  let currentFilter = 'all';
+  let selectionMode = false;
+  const selectedItems = new Set();
+
+  const reviewStatuses = {
+    'img_0038.jpg': 'approved',
+    'img_0039.jpg': 'rejected',
+    'img_0042.jpg': 'pending',
+    'img_0043.jpg': 'pending',
+    'img_0044.jpg': 'pending',
+  };
+
+  // ─── Toast ─────────────────────────────────────────────────────────────────
+
   function showToast(msg, color) {
     const el = document.createElement('div');
-    el.style.cssText = `padding:8px 14px;background:${color || '#242424'};border:1px solid rgba(255,255,255,0.12);border-radius:6px;font-size:12px;color:#e8e8e6;pointer-events:all;box-shadow:0 4px 12px rgba(0,0,0,0.6);`;
+    el.style.cssText = `padding:8px 14px;background:${color || '#212529'};border:1px solid #343a40;border-radius:6px;font-size:12px;color:#f8f9fa;pointer-events:all;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:opacity 0.3s;`;
     el.textContent = msg;
     document.getElementById('toastContainer').appendChild(el);
-    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 2500);
+    setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2500);
   }
 
+  // ─── Single review actions ──────────────────────────────────────────────────
+
   function handleApprove() {
-    showToast('Đã duyệt · Chuyển sang ảnh tiếp theo', 'rgba(39,174,96,0.25)');
+    reviewStatuses[currentReviewImg] = 'approved';
+    updateItemStatus(currentReviewImg, 'approved');
+    updateReviewCount();
+    showToast('Đã duyệt · Chuyển sang ảnh tiếp theo', '#212529');
+    setTimeout(() => navigateImage(1), 500);
   }
 
   function handleReject() {
     const note = document.getElementById('reviewNote').value.trim();
     if (!note) {
-      document.getElementById('reviewNote').style.borderColor = '#f87171';
+      document.getElementById('reviewNote').style.borderColor = '#dc2626';
       document.getElementById('reviewNote').focus();
-      showToast('Vui lòng nhập ghi chú trước khi trả lại', 'rgba(180,60,40,0.25)');
+      showToast('Vui lòng nhập ghi chú trước khi trả lại');
       return;
     }
+    reviewStatuses[currentReviewImg] = 'rejected';
+    updateItemStatus(currentReviewImg, 'rejected');
+    updateReviewCount();
     document.getElementById('reviewNote').style.borderColor = '';
-    showToast('Đã trả lại · Annotator sẽ nhận thông báo', 'rgba(180,60,40,0.25)');
+    showToast('Đã trả lại · Annotator sẽ nhận thông báo');
+    setTimeout(() => navigateImage(1), 500);
   }
+
+  // ─── Item status update ─────────────────────────────────────────────────────
+
+  function updateItemStatus(imgName, status) {
+    const item = document.querySelector(`.img-list-item[data-img="${imgName}"]`);
+    if (!item) return;
+    item.dataset.status = status;
+    const dot = item.querySelector('.status-dot');
+    if (dot) {
+      dot.className = 'status-dot ' + status;
+      dot.textContent = status === 'approved' ? 'Đã duyệt' : status === 'rejected' ? 'Trả lại' : 'Chờ duyệt';
+    }
+    const thumb = item.querySelector('.img-thumb');
+    if (thumb) {
+      const svgEl = thumb.querySelector('svg');
+      if (status === 'approved') {
+        thumb.style.background = 'linear-gradient(135deg,#2a3a28,#1e2832)';
+        if (svgEl) svgEl.setAttribute('stroke', '#4caf50');
+      } else if (status === 'rejected') {
+        thumb.style.background = 'linear-gradient(135deg,#3a2a1e,#2a1e18)';
+        if (svgEl) svgEl.setAttribute('stroke', '#f87171');
+      } else {
+        thumb.style.background = '';
+        if (svgEl) svgEl.setAttribute('stroke', 'currentColor');
+      }
+    }
+    // Re-apply filter — hide item if it no longer matches
+    if (currentFilter !== 'all' && status !== currentFilter) {
+      item.style.display = 'none';
+    }
+  }
+
+  // ─── Filter ────────────────────────────────────────────────────────────────
+
+  function filterReviewImages(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.img-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.img-list-item').forEach(item => {
+      const show = filter === 'all' || item.dataset.status === filter;
+      item.style.display = show ? '' : 'none';
+    });
+    updateReviewCount();
+    // Clear selection when filter changes
+    if (selectionMode) { selectedItems.clear(); syncCheckboxes(); updateBulkBar(); }
+  }
+
+  function updateReviewCount() {
+    const total = Object.keys(reviewStatuses).length;
+    const pending = Object.values(reviewStatuses).filter(s => s === 'pending').length;
+    const done = total - pending;
+    document.getElementById('reviewCount').textContent = `${done} / ${total}`;
+  }
+
+  // ─── Image navigation ───────────────────────────────────────────────────────
+
+  function selectReviewImage(imgName) {
+    // In selection mode: toggle checkbox instead of navigating
+    if (selectionMode) {
+      const item = document.querySelector(`.img-list-item[data-img="${imgName}"]`);
+      const cb = item?.querySelector('.sel-cb');
+      if (cb) { cb.checked = !cb.checked; toggleItemSelection(imgName, cb.checked); }
+      return;
+    }
+    if (imgName === currentReviewImg) return;
+    currentReviewImg = imgName;
+    document.querySelectorAll('.img-list-item').forEach(el => {
+      const active = el.dataset.img === imgName;
+      el.classList.toggle('active', active);
+      const nameEl = el.querySelector('.img-list-item__name');
+      if (nameEl) nameEl.style.color = active ? 'var(--cv-accent)' : '';
+      const thumb = el.querySelector('.img-thumb');
+      if (thumb) thumb.style.border = active ? '1px solid var(--cv-accent)' : '';
+    });
+    const crumb = document.querySelector('.breadcrumb-current');
+    if (crumb) crumb.textContent = 'Review · ' + imgName;
+    const lbl = document.querySelector('.mock-image-label');
+    if (lbl) lbl.textContent = imgName + ' · Annotator: Trần Bình';
+    document.getElementById('reviewNote').value = '';
+    document.getElementById('reviewNote').style.borderColor = '';
+  }
+
+  function navigateImage(dir) {
+    const items = Array.from(document.querySelectorAll('.img-list-item')).filter(el => el.style.display !== 'none');
+    const idx = items.findIndex(el => el.dataset.img === currentReviewImg);
+    const next = items[idx + dir];
+    if (next) selectReviewImage(next.dataset.img);
+    else showToast(dir > 0 ? 'Đây là ảnh cuối' : 'Đây là ảnh đầu tiên');
+  }
+
+  // ─── Selection mode ────────────────────────────────────────────────────────
+
+  function toggleSelectionMode() {
+    selectionMode = !selectionMode;
+    document.getElementById('imgList').classList.toggle('selection-mode', selectionMode);
+    const btn = document.getElementById('btnSelectMode');
+    btn.style.color = selectionMode ? 'var(--cv-accent)' : '';
+    btn.style.borderColor = selectionMode ? 'var(--cv-accent)' : '';
+    document.getElementById('panelNav').style.display = selectionMode ? 'none' : '';
+    document.getElementById('bulkBar').classList.toggle('visible', selectionMode);
+    if (!selectionMode) { selectedItems.clear(); syncCheckboxes(); updateBulkBar(); }
+  }
+
+  function toggleItemSelection(imgName, checked) {
+    if (checked) selectedItems.add(imgName);
+    else selectedItems.delete(imgName);
+    const item = document.querySelector(`.img-list-item[data-img="${imgName}"]`);
+    if (item) item.classList.toggle('sel-checked', checked);
+    updateBulkBar();
+  }
+
+  function selectAllVisible() {
+    document.querySelectorAll('.img-list-item').forEach(item => {
+      if (item.style.display === 'none') return;
+      const imgName = item.dataset.img;
+      selectedItems.add(imgName);
+      item.classList.add('sel-checked');
+      const cb = item.querySelector('.sel-cb');
+      if (cb) cb.checked = true;
+    });
+    updateBulkBar();
+  }
+
+  function syncCheckboxes() {
+    document.querySelectorAll('.img-list-item').forEach(item => {
+      item.classList.remove('sel-checked');
+      const cb = item.querySelector('.sel-cb');
+      if (cb) cb.checked = false;
+    });
+  }
+
+  function updateBulkBar() {
+    const n = selectedItems.size;
+    document.getElementById('bulkInfo').textContent = n ? `${n} ảnh đã chọn` : 'Chưa chọn ảnh nào';
+    document.querySelectorAll('.bulk-count').forEach(el => el.textContent = n);
+  }
+
+  // ─── Bulk actions ──────────────────────────────────────────────────────────
+
+  function bulkApprove() {
+    if (!selectedItems.size) { showToast('Chưa chọn ảnh nào'); return; }
+    const n = selectedItems.size;
+    selectedItems.forEach(imgName => {
+      reviewStatuses[imgName] = 'approved';
+      updateItemStatus(imgName, 'approved');
+    });
+    selectedItems.clear(); syncCheckboxes(); updateBulkBar(); updateReviewCount();
+    showToast(`Đã duyệt ${n} ảnh`, '#212529');
+  }
+
+  function bulkReject() {
+    if (!selectedItems.size) { showToast('Chưa chọn ảnh nào'); return; }
+    const n = selectedItems.size;
+    selectedItems.forEach(imgName => {
+      reviewStatuses[imgName] = 'rejected';
+      updateItemStatus(imgName, 'rejected');
+    });
+    selectedItems.clear(); syncCheckboxes(); updateBulkBar(); updateReviewCount();
+    showToast(`Đã trả lại ${n} ảnh`);
+  }
+
+  // ─── Fullscreen ────────────────────────────────────────────────────────────
+
+  function toggleFullscreen() {
+    const shell = document.querySelector('.app-shell');
+    const entering = shell.classList.toggle('is-fullscreen');
+    const icon = document.getElementById('fsIcon');
+    const btn = document.getElementById('btnFullscreen');
+    if (entering) {
+      icon.innerHTML = '<polyline points="4 14 10 14 10 20"/><polyline points="20 14 14 14 14 20"/><polyline points="4 10 10 10 10 4"/><polyline points="20 10 14 10 14 4"/>';
+      if (btn) btn.dataset.tooltip = 'Thoát toàn màn hình (F)';
+    } else {
+      icon.innerHTML = '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
+      if (btn) btn.dataset.tooltip = 'Toàn màn hình (F)';
+      document.querySelector('.editor-body').classList.remove('is-focus');
+    }
+  }
+
+  // ─── Keyboard ──────────────────────────────────────────────────────────────
+
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+    if ((e.key === 'ArrowLeft' || e.key === 'ArrowUp') && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault(); navigateImage(-1);
+    } else if ((e.key === 'ArrowRight' || e.key === 'ArrowDown') && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault(); navigateImage(1);
+    } else if (e.key === 'f' || e.key === 'F') {
+      toggleFullscreen();
+    } else if (e.key === 'Tab') {
+      e.preventDefault(); document.querySelector('.editor-body').classList.toggle('is-focus');
+    } else if ((e.key === 'a' || e.key === 'A') && !selectionMode) {
+      handleApprove();
+    } else if ((e.key === 'r' || e.key === 'R') && !selectionMode) {
+      handleReject();
+    } else if (e.key === 'Escape') {
+      if (selectionMode) toggleSelectionMode();
+      else if (document.querySelector('.app-shell').classList.contains('is-fullscreen')) toggleFullscreen();
+    }
+  });
+
+  // ─── Init ──────────────────────────────────────────────────────────────────
+
+  document.addEventListener('DOMContentLoaded', updateReviewCount);
 </script>
 <script src="../components/sidebar.js"></script>
 </body>
