@@ -1264,11 +1264,14 @@ document.addEventListener('keydown', e => {
   else if (e.key==='b'||e.key==='B') setTool('bbox');
   else if (e.key==='p'||e.key==='P') setTool('polygon');
   else if (e.key==='Escape') {
+    const modal = document.getElementById('submitModal');
+    if (modal.style.display === 'flex') { modal.style.display = 'none'; return; }
     if (polyPts.length) { polyPts=[]; polyMouse=null; render(); }
     else selectAnnotation(null);
   }
   else if ((e.key==='Delete'||e.key==='Backspace') && selectedId!==null) deleteAnnotation(selectedId);
   else if ((e.ctrlKey||e.metaKey) && e.key==='Enter') { e.preventDefault(); document.getElementById('submitModal').style.display='flex'; }
+  else if (e.key==='Enter' && document.getElementById('submitModal').style.display==='flex') { e.preventDefault(); doSubmit(); }
   else if (e.key==='Enter' && activeTool==='polygon' && polyPts.length>=3) { e.preventDefault(); closePoly(); }
   else if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); doSave(); }
   else if ((e.key==='+'||e.key==='=') && !e.ctrlKey) zoomStep(0.25);
