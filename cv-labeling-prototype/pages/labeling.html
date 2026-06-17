@@ -173,13 +173,20 @@
     .annotation-item:hover .annotation-del { opacity: 1; }
     .annotation-del:hover { background: var(--cv-hover); color: #f87171; }
 
-    .ann-edit-panel { margin: 8px; padding: 10px 12px; background: var(--cv-surface); border: 1px solid var(--cv-border); border-left: 3px solid var(--cv-accent); border-radius: 0 6px 6px 0; box-shadow: 0 1px 4px rgba(18,70,128,0.08); }
+    .ann-edit-panel { margin: 10px 10px 4px; padding: 12px 14px; background: var(--cv-surface); border: 1px solid var(--cv-border); border-left: 3px solid var(--cv-accent); border-radius: 0 6px 6px 0; box-shadow: 0 2px 8px rgba(18,70,128,0.10); }
     .ann-edit-panel__title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--cv-accent); margin-bottom: 10px; display:flex; align-items:center; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--cv-border); }
     .ann-edit-class-btn { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:3px; border:1px solid var(--cv-border); background:var(--cv-toolbar); cursor:pointer; font-size:11px; color:var(--cv-text); transition:all 120ms; font-family:inherit; white-space:nowrap; }
     .ann-edit-class-btn:hover { border-color:var(--cv-accent); background:var(--cv-hover); }
     .ann-edit-class-btn.selected-class { border-color:var(--cv-accent); background:var(--cv-active); color:var(--cv-accent); }
 
-    .ctx-menu { position:fixed; background:var(--cv-surface); border:1px solid var(--cv-border); border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:900; min-width:172px; padding:4px 0; }
+    .ctx-menu { position:fixed; background:var(--cv-surface); border:1px solid var(--cv-border); border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.14); z-index:900; min-width:200px; padding:4px 0; }
+    .ctx-header { padding:8px 14px 7px; font-size:11px; color:var(--cv-muted); }
+    .ctx-class-section { padding:6px 10px 8px; }
+    .ctx-class-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--cv-muted); margin-bottom:5px; }
+    .ctx-class-grid { display:flex; flex-wrap:wrap; gap:4px; }
+    .ctx-class-chip { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:3px; border:1px solid var(--cv-border); background:var(--cv-bg); cursor:pointer; font-size:11px; color:var(--cv-text); font-family:inherit; transition:all 120ms; }
+    .ctx-class-chip:hover { border-color:var(--cv-accent); background:var(--cv-hover); }
+    .ctx-class-chip.active { border-color:var(--cv-accent); background:var(--cv-active); color:var(--cv-accent); font-weight:600; }
     .ctx-menu-item { display:flex; align-items:center; gap:9px; padding:7px 14px; font-size:12px; cursor:pointer; transition:background 100ms; color:var(--cv-text); background:none; border:none; width:100%; text-align:left; font-family:inherit; }
     .ctx-menu-item:hover { background:var(--cv-hover); }
     .ctx-menu-item.ctx-danger { color:#f87171; }
@@ -548,15 +555,13 @@
 
 <!-- Context Menu -->
 <div id="ctxMenu" class="ctx-menu" style="display:none;">
-  <button class="ctx-menu-item" id="ctxItemSelect" onclick="ctxDoSelect()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-7 1-4 6z"/></svg>
-    Chọn annotation
-  </button>
-  <button class="ctx-menu-item" id="ctxItemEdit" onclick="ctxDoEdit()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-    Đổi class
-  </button>
-  <div class="ctx-menu-sep"></div>
+  <div id="ctxHeader" class="ctx-header"></div>
+  <div class="ctx-menu-sep" style="margin:0;"></div>
+  <div class="ctx-class-section">
+    <div class="ctx-class-label">Đổi class</div>
+    <div id="ctxClassGrid" class="ctx-class-grid"></div>
+  </div>
+  <div class="ctx-menu-sep" style="margin:0;"></div>
   <button class="ctx-menu-item ctx-danger" onclick="ctxDoDelete()">
     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
     Xóa annotation
@@ -843,9 +848,22 @@ function showCtxMenu(e, annId) {
   e.preventDefault(); e.stopPropagation();
   _ctxAnnId = annId;
   selectAnnotation(annId);
+
+  const ann = annotations.find(a => a.id === annId);
+  const c = cls(ann.cid);
+  const num = annotations.filter(a => a.cid === ann.cid && a.id <= ann.id).length;
+  const typeLabel = ann.type === 'bbox' ? 'Bounding box' : 'Polygon';
+  document.getElementById('ctxHeader').innerHTML =
+    `<b style="color:var(--cv-text);">${typeLabel}</b> · <span>${c.name} #${num}</span>`;
+  document.getElementById('ctxClassGrid').innerHTML = classRegistry.map(cr =>
+    `<button class="ctx-class-chip${cr.id===ann.cid?' active':''}" onclick="ctxChangeClass(${annId},${cr.id})">
+      <span style="width:7px;height:7px;border-radius:2px;background:${cr.color};display:inline-block;flex-shrink:0;"></span>${cr.name}
+    </button>`
+  ).join('');
+
   const menu = document.getElementById('ctxMenu');
-  const x = Math.min(e.clientX, window.innerWidth  - 184);
-  const y = Math.min(e.clientY, window.innerHeight - 120);
+  const x = Math.min(e.clientX, window.innerWidth  - 210);
+  const y = Math.min(e.clientY, window.innerHeight - 160);
   menu.style.left = x + 'px';
   menu.style.top  = y + 'px';
   menu.style.display = 'block';
@@ -856,8 +874,7 @@ function hideCtxMenu() {
   _ctxAnnId = null;
 }
 
-function ctxDoSelect() { if (_ctxAnnId!==null) { setTool('select'); selectAnnotation(_ctxAnnId); } hideCtxMenu(); }
-function ctxDoEdit()   { if (_ctxAnnId!==null) { setTool('select'); selectAnnotation(_ctxAnnId); } hideCtxMenu(); }
+function ctxChangeClass(annId, cid) { changeAnnotationClass(annId, cid); hideCtxMenu(); }
 function ctxDoDelete() { const id = _ctxAnnId; hideCtxMenu(); if (id!==null) deleteAnnotation(id); }
 
 // ─── Image navigation ─────────────────────────────────────────────────────────
