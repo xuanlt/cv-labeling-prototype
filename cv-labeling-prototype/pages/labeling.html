@@ -211,6 +211,11 @@
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--cv-border); border-radius: 2px; }
+
+    /* ─── Fullscreen mode ───────────────────────────────── */
+    .app-shell.is-fullscreen .sidebar { display: none; }
+    .app-shell.is-fullscreen .topbar  { display: none; }
+    .app-shell.is-fullscreen .editor-body { height: 100vh; }
   </style>
 </head>
 <body>
@@ -401,6 +406,10 @@
           <span id="toolbarAnnCount" style="font-size:11px;color:var(--cv-muted);">0 annotations</span>
           <div class="tool-sep"></div>
           <span id="zoomDisplay" style="font-size:11px;color:var(--cv-muted);">100%</span>
+          <div class="tool-sep"></div>
+          <button class="tool-btn" id="btnFullscreen" onclick="toggleFullscreen()" data-tooltip="Toàn màn hình (F)">
+            <svg id="fsIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          </button>
         </div>
       </div>
 
@@ -501,9 +510,9 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
           Đã tự lưu lúc 14:32
         </div>
-        <button class="ebtn ebtn-secondary" style="justify-content:center;" onclick="doSave()">Lưu nháp</button>
+        <button class="ebtn ebtn-secondary" style="justify-content:center;" onclick="doSave()">Lưu nháp <kbd style="margin-left:2px;font-size:10px;font-weight:500;opacity:0.55;background:rgba(0,0,0,0.07);border-radius:3px;padding:1px 4px;font-family:inherit;">⌃S</kbd></button>
         <button class="ebtn ebtn-primary" style="justify-content:center;" onclick="document.getElementById('submitModal').style.display='flex'">
-          Nộp để duyệt
+          Nộp để duyệt <kbd style="margin-left:2px;font-size:10px;font-weight:500;opacity:0.55;background:rgba(0,0,0,0.07);border-radius:3px;padding:1px 4px;font-family:inherit;">⌃Enter</kbd> 
         </button>
       </div>
     </aside>
@@ -1259,12 +1268,12 @@ document.addEventListener('keydown', e => {
   }
   else if ((e.key==='Delete'||e.key==='Backspace') && selectedId!==null) deleteAnnotation(selectedId);
   else if ((e.ctrlKey||e.metaKey) && e.key==='Enter') { e.preventDefault(); document.getElementById('submitModal').style.display='flex'; }
-  else if (e.key==='Enter' && document.getElementById('submitModal').style.display==='flex') { e.preventDefault(); doSubmit(); }
   else if (e.key==='Enter' && activeTool==='polygon' && polyPts.length>=3) { e.preventDefault(); closePoly(); }
   else if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); doSave(); }
   else if ((e.key==='+'||e.key==='=') && !e.ctrlKey) zoomStep(0.25);
   else if (e.key==='-' && !e.ctrlKey) zoomStep(-0.25);
   else if (e.key==='0') zoomFit();
+  else if (e.key==='f'||e.key==='F') toggleFullscreen();
   else if (/^[1-9]$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
     const cid = parseInt(e.key);
     const reg = classRegistry.find(c => c.key===e.key || c.id===cid);
@@ -1284,6 +1293,20 @@ document.getElementById('canvasViewport').addEventListener('mouseleave', () => {
 });
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
+
+function toggleFullscreen() {
+  const shell = document.querySelector('.app-shell');
+  const entering = shell.classList.toggle('is-fullscreen');
+  const btn = document.getElementById('btnFullscreen');
+  const icon = document.getElementById('fsIcon');
+  if (entering) {
+    icon.innerHTML = '<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/>';
+    btn.dataset.tooltip = 'Thoát toàn màn hình (F)';
+  } else {
+    icon.innerHTML = '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>';
+    btn.dataset.tooltip = 'Toàn màn hình (F)';
+  }
+}
 
 function showToast(msg) {
   const el = document.createElement('div');
