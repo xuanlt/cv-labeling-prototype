@@ -173,8 +173,8 @@
     .annotation-item:hover .annotation-del { opacity: 1; }
     .annotation-del:hover { background: var(--cv-hover); color: #f87171; }
 
-    .ann-edit-panel { padding: 10px 12px; background: var(--cv-active); border-bottom: 1px solid var(--cv-border); }
-    .ann-edit-panel__title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--cv-accent); margin-bottom: 8px; display:flex; align-items:center; justify-content:space-between; }
+    .ann-edit-panel { margin: 8px; padding: 10px 12px; background: var(--cv-surface); border: 1px solid var(--cv-border); border-left: 3px solid var(--cv-accent); border-radius: 0 6px 6px 0; box-shadow: 0 1px 4px rgba(18,70,128,0.08); }
+    .ann-edit-panel__title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--cv-accent); margin-bottom: 10px; display:flex; align-items:center; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid var(--cv-border); }
     .ann-edit-class-btn { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:3px; border:1px solid var(--cv-border); background:var(--cv-toolbar); cursor:pointer; font-size:11px; color:var(--cv-text); transition:all 120ms; font-family:inherit; white-space:nowrap; }
     .ann-edit-class-btn:hover { border-color:var(--cv-accent); background:var(--cv-hover); }
     .ann-edit-class-btn.selected-class { border-color:var(--cv-accent); background:var(--cv-active); color:var(--cv-accent); }
@@ -690,14 +690,12 @@ function onSvgDown(e) {
     }
 
   } else if (activeTool === 'bbox') {
-    if (e.target.closest('[data-ann-id]')) return;
     e.preventDefault();
     drawing = true; drawAnchor = pt; drawCurrent = pt;
     selectAnnotation(null);
     startGlobalDrag();
 
   } else if (activeTool === 'polygon') {
-    if (e.target.closest('[data-ann-id]')) return;
     e.preventDefault();
     if (polyPts.length >= 3) {
       const d = Math.hypot(pt.x - polyPts[0][0], pt.y - polyPts[0][1]);
