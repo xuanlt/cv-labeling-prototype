@@ -351,12 +351,14 @@
       </div>
 
       <div class="panel-nav">
-        <button class="ebtn ebtn-secondary" onclick="navigateImage(-1)">
+        <button class="ebtn ebtn-secondary" onclick="navigateImage(-1)" title="Ảnh trước (←)">
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           Trước
+          <kbd style="margin-left:2px;font-size:10px;font-weight:500;opacity:0.55;background:rgba(0,0,0,0.07);border-radius:3px;padding:1px 4px;font-family:inherit;">←</kbd>
         </button>
-        <button class="ebtn ebtn-secondary" onclick="navigateImage(1)">
+        <button class="ebtn ebtn-secondary" onclick="navigateImage(1)" title="Ảnh tiếp (→)">
           Tiếp
+          <kbd style="margin-left:2px;font-size:10px;font-weight:500;opacity:0.55;background:rgba(0,0,0,0.07);border-radius:3px;padding:1px 4px;font-family:inherit;">→</kbd>
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
@@ -1274,6 +1276,8 @@ document.addEventListener('keydown', e => {
   else if (e.key==='-' && !e.ctrlKey) zoomStep(-0.25);
   else if (e.key==='0') zoomFit();
   else if (e.key==='f'||e.key==='F') toggleFullscreen();
+  else if (e.key==='ArrowLeft'  && !e.ctrlKey && !e.metaKey) { e.preventDefault(); navigateImage(-1); }
+  else if (e.key==='ArrowRight' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); navigateImage(1); }
   else if (/^[1-9]$/.test(e.key) && !e.ctrlKey && !e.metaKey) {
     const cid = parseInt(e.key);
     const reg = classRegistry.find(c => c.key===e.key || c.id===cid);
