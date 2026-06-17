@@ -123,6 +123,7 @@
     }
     .tool-btn:hover { background: var(--cv-hover); color: var(--cv-text); }
     .tool-btn.active { background: var(--cv-active); border-color: var(--cv-border); color: var(--cv-text); }
+    .tool-btn.disabled { opacity: 0.35; pointer-events: none; }
     .tool-btn svg { width: 16px; height: 16px; }
     .tool-shortcut { position: absolute; bottom: 3px; right: 3px; font-size: 8px; font-weight: 700; color: var(--cv-muted); line-height: 1; }
     .tool-sep { width: 1px; height: 22px; background: var(--cv-border); margin: 0 4px; }
@@ -404,10 +405,10 @@
 
         <div class="tool-sep"></div>
 
-        <button class="tool-btn" data-tooltip="Undo (Ctrl+Z)" onclick="showToast('Undo — chưa triển khai')">
+        <button class="tool-btn disabled" id="btn-undo" data-tooltip="Undo (Ctrl+Z)" onclick="undo()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
         </button>
-        <button class="tool-btn" data-tooltip="Redo (Ctrl+Shift+Z)" onclick="showToast('Redo — chưa triển khai')">
+        <button class="tool-btn disabled" id="btn-redo" data-tooltip="Redo (Ctrl+Shift+Z)" onclick="redo()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 14 20 9 15 4"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
         </button>
 
@@ -614,6 +615,7 @@ const imageStore = {
 
 let currentImg = 'img_0042.jpg';
 let annotations = clone(imageStore[currentImg].anns);
+const undoStack = [], redoStack = [];
 let nextId = 10;
 let selectedId = null;
 let activeTool = 'bbox';
@@ -751,6 +753,7 @@ function onGlobalUp(e) {
     const x2 = Math.max(drawAnchor.x, pt.x), y2 = Math.max(drawAnchor.y, pt.y);
     const w = x2 - x, h = y2 - y;
     if (w > 6 && h > 6) {
+      pushHistory();
       const ann = { id: nextId++, type:'bbox', cid: activeClassId, x, y, w, h };
       annotations.push(ann);
       save(); selectAnnotation(ann.id);
@@ -780,6 +783,7 @@ function stopGlobalDrag() {
 // ─── Drag / Resize ────────────────────────────────────────────────────────────
 
 function startDrag(pt, mode, annId) {
+  pushHistory();
   dragging = true; dragMode = mode; dragStart = pt;
   dragOrigAnn = clone(annotations.find(a => a.id === annId));
   startGlobalDrag();
@@ -822,6 +826,7 @@ function applyDrag(pt) {
 
 function closePoly() {
   if (polyPts.length < 3) return;
+  pushHistory();
   const ann = { id: nextId++, type:'poly', cid: activeClassId, pts: clone(polyPts) };
   annotations.push(ann);
   polyPts = []; polyMouse = null;
@@ -835,6 +840,7 @@ function selectAnnotation(id) { selectedId = id; render(); }
 function deleteAnnotation(id) {
   const i = annotations.findIndex(a => a.id === id);
   if (i === -1) return;
+  pushHistory();
   annotations.splice(i, 1);
   if (selectedId === id) selectedId = null;
   save(); render();
@@ -844,6 +850,7 @@ function deleteAnnotation(id) {
 function changeAnnotationClass(annId, newCid) {
   const ann = annotations.find(a => a.id === annId);
   if (!ann) return;
+  pushHistory();
   ann.cid = newCid;
   save(); render();
   showToast('Đã đổi class: ' + cls(newCid).name);
@@ -895,6 +902,7 @@ function selectImage(imgName) {
   annotations = clone(imageStore[currentImg].anns);
   nextId = annotations.length ? Math.max(...annotations.map(a=>a.id)) + 1 : 1;
   selectedId = null; drawing = false; dragging = false; polyPts = []; polyMouse = null;
+  undoStack.length = 0; redoStack.length = 0; updateHistoryBtns();
 
   document.getElementById('mockImage').style.background = imageStore[currentImg].bg;
   document.getElementById('imgLabel').textContent = imgName + ' · 1920×1080';
@@ -1253,6 +1261,36 @@ function filterImages(filter, btn) {
   document.getElementById('imgCount').textContent = visible + ' / 8';
 }
 
+// ─── Undo / Redo ──────────────────────────────────────────────────────────────
+
+function pushHistory() {
+  undoStack.push(clone(annotations));
+  if (undoStack.length > 50) undoStack.shift();
+  redoStack.length = 0;
+  updateHistoryBtns();
+}
+
+function undo() {
+  if (!undoStack.length) return;
+  redoStack.push(clone(annotations));
+  annotations = undoStack.pop();
+  selectedId = null;
+  save(); render(); updateHistoryBtns();
+}
+
+function redo() {
+  if (!redoStack.length) return;
+  undoStack.push(clone(annotations));
+  annotations = redoStack.pop();
+  selectedId = null;
+  save(); render(); updateHistoryBtns();
+}
+
+function updateHistoryBtns() {
+  document.getElementById('btn-undo').classList.toggle('disabled', !undoStack.length);
+  document.getElementById('btn-redo').classList.toggle('disabled', !redoStack.length);
+}
+
 // ─── Actions ──────────────────────────────────────────────────────────────────
 
 function doSave() {
@@ -1300,6 +1338,9 @@ document.addEventListener('keydown', e => {
   else if (e.key==='Enter' && document.getElementById('submitModal').style.display==='flex') { e.preventDefault(); doSubmit(); }
   else if (e.key==='Enter' && activeTool==='polygon' && polyPts.length>=3) { e.preventDefault(); closePoly(); }
   else if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); doSave(); }
+  else if ((e.ctrlKey||e.metaKey) && e.shiftKey && e.key==='z') { e.preventDefault(); redo(); }
+  else if ((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key==='z') { e.preventDefault(); undo(); }
+  else if ((e.ctrlKey||e.metaKey) && e.key==='y') { e.preventDefault(); redo(); }
   else if ((e.key==='+'||e.key==='=') && !e.ctrlKey) zoomStep(0.25);
   else if (e.key==='-' && !e.ctrlKey) zoomStep(-0.25);
   else if (e.key==='0') zoomFit();
