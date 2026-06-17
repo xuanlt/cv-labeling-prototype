@@ -962,7 +962,7 @@ function renderAnn(svg, ann) {
 
 function appendLabel(g, c, x, y) {
   const lw = c.name.length * 5.4 + 6, lh = 13;
-  g.appendChild(mkEl('rect', { x, y:y-lh, width:lw, height:lh, fill:c.color, rx:2, style:'pointer-events:none' }));
+  g.appendChild(mkEl('rect', { x, y:y-lh, width:lw, height:lh, fill:c.color, rx:2, cursor: activeTool==='select'?'pointer':'crosshair' }));
   const t = mkEl('text', { x:x+3, y:y-3, fill:'white', 'font-size':'8', 'font-weight':'600', 'font-family':'system-ui,sans-serif', style:'pointer-events:none' });
   t.textContent = c.name; g.appendChild(t);
 }
