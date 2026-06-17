@@ -244,9 +244,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
           Lưu nháp
         </button>
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('submitModal').style.display='flex'">
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('submitModal').style.display='flex'" title="Nộp để duyệt (Ctrl+Enter)">
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
           Nộp để duyệt
+          <kbd style="margin-left:2px;font-size:10px;font-weight:500;opacity:0.7;background:rgba(255,255,255,0.2);border-radius:3px;padding:1px 4px;font-family:inherit;">⌃↵</kbd>
         </button>
       </div>
     </header>
@@ -1256,6 +1257,7 @@ document.addEventListener('keydown', e => {
     else selectAnnotation(null);
   }
   else if ((e.key==='Delete'||e.key==='Backspace') && selectedId!==null) deleteAnnotation(selectedId);
+  else if ((e.ctrlKey||e.metaKey) && e.key==='Enter') { e.preventDefault(); document.getElementById('submitModal').style.display='flex'; }
   else if (e.key==='Enter' && activeTool==='polygon' && polyPts.length>=3) { e.preventDefault(); closePoly(); }
   else if ((e.ctrlKey||e.metaKey) && e.key==='s') { e.preventDefault(); doSave(); }
   else if ((e.key==='+'||e.key==='=') && !e.ctrlKey) zoomStep(0.25);
