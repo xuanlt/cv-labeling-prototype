@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CVLabel — Phân công ảnh</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    .app-shell { display:flex; height:100vh; overflow:hidden; }
+    .sidebar { width:var(--sidebar-width); height:100vh; background:var(--color-surface); border-right:1px solid var(--color-border); display:flex; flex-direction:column; flex-shrink:0; }
+    .sidebar-logo { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-4); height:var(--topbar-height); border-bottom:1px solid var(--color-border); }
+    .sidebar-logo__icon { width:28px; height:28px; background:var(--color-accent); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; }
+    .sidebar-logo__icon svg { color:white; width:16px; height:16px; }
+    .sidebar-logo__text { font-family:var(--font-heading); font-size:var(--text-lg); font-weight:600; }
+    .sidebar-nav { flex:1; overflow-y:auto; padding:var(--space-3) 0; }
+    .nav-section-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--color-text-muted); padding:var(--space-2) var(--space-4); }
+    .nav-item { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-2) var(--space-4); font-size:var(--text-sm); font-weight:500; color:var(--color-text-muted); text-decoration:none; transition:all var(--transition); }
+    .nav-item svg { width:18px; height:18px; flex-shrink:0; }
+    .nav-item:hover { background:var(--color-bg); color:var(--color-text); text-decoration:none; }
+    .nav-item.active { background:var(--color-accent-light); color:var(--color-accent); }
+    .nav-group { margin-bottom:2px; }
+    .nav-group-hd { display:flex; align-items:center; gap:6px; width:100%; padding:5px var(--space-3); background:none; border:none; cursor:pointer; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--color-text-muted); border-radius:var(--radius-sm); text-align:left; transition:background var(--transition),color var(--transition); }
+    .nav-group-hd:hover { background:var(--color-bg); color:var(--color-text); }
+    .nav-group-chevron { margin-left:auto; transition:transform .15s; flex-shrink:0; }
+    .nav-group-hd.collapsed .nav-group-chevron { transform:rotate(-90deg); }
+    .nav-group-bd { padding-bottom:var(--space-2); }
+    .nav-group-bd.hidden { display:none; }
+    .nav-sub { margin:2px 0; }
+    .nav-sub-hd { display:flex; align-items:center; gap:var(--space-3); width:100%; padding:var(--space-2) var(--space-3); background:none; border:none; cursor:pointer; font-size:var(--text-sm); color:var(--color-text); border-radius:var(--radius-sm); text-align:left; transition:background var(--transition),color var(--transition); }
+    .nav-sub-hd:hover { background:var(--color-bg); color:var(--color-text); }
+    .nav-sub-hd svg { width:18px; height:18px; flex-shrink:0; }
+    .nav-sub-chevron { margin-left:auto; transition:transform .15s; flex-shrink:0; }
+    .nav-sub-hd.collapsed .nav-sub-chevron { transform:rotate(-90deg); }
+    .nav-sub-bd { padding-left:var(--space-4); padding-bottom:var(--space-1); }
+    .nav-sub-bd.hidden { display:none; }
+    .nav-sub-item { font-size:13px; }
+    .sidebar-footer { padding:var(--space-4); border-top:1px solid var(--color-border); }
+    .user-row { display:flex; align-items:center; gap:var(--space-3); }
+    .user-row__name { font-size:var(--text-sm); font-weight:500; }
+    .user-row__role { font-size:var(--text-xs); color:var(--color-text-muted); }
+    .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+    .topbar { height:var(--topbar-height); background:var(--color-surface); border-bottom:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; padding:0 var(--space-6); flex-shrink:0; }
+    .breadcrumb { display:flex; align-items:center; gap:var(--space-2); font-size:var(--text-sm); }
+    .breadcrumb a { color:var(--color-text-muted); text-decoration:none; }
+    .breadcrumb a:hover { color:var(--color-text); }
+    .breadcrumb-sep { color:var(--color-border); }
+    .breadcrumb-current { font-weight:500; }
+    .topbar-right { display:flex; align-items:center; gap:var(--space-3); }
+    .topbar-avatar-btn { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-1) var(--space-2); background:none; border:1px solid transparent; border-radius:var(--radius); cursor:pointer; transition:all var(--transition); }
+    .topbar-avatar-btn:hover { background:var(--color-bg); border-color:var(--color-border); }
+    .topbar-name { font-size:var(--text-sm); font-weight:500; }
+    .main-content { flex:1; overflow-y:auto; padding:var(--space-8); }
+
+    /* Summary bar */
+    .summary-bar {
+      background: var(--color-accent-light);
+      border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+      border-radius: var(--radius-md);
+      padding: var(--space-4) var(--space-5);
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+      margin-bottom: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .summary-stat { text-align: center; }
+    .summary-stat__val { font-size: var(--text-xl); font-weight: 600; font-family: var(--font-heading); color: var(--color-accent); }
+    .summary-stat__label { font-size: var(--text-xs); color: var(--color-text-muted); }
+
+    /* Annotator row state */
+    .overdue-row td { background: color-mix(in srgb, var(--color-pending) 8%, transparent) !important; }
+
+    .quota-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 140px;
+    }
+
+    .assign-input {
+      width: 64px;
+      height: 30px;
+      text-align: center;
+      padding: 0 8px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      font-size: var(--text-sm);
+      background: var(--color-surface);
+      color: var(--color-text);
+    }
+
+    .assign-input:focus { outline: none; border-color: var(--color-accent); }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar-placeholder"></aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <nav class="breadcrumb">
+        <a href="#">CVLabel</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="projects.html">Dự án</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="project-detail.html">License Plate Detection v2</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">Phân công</span>
+      </nav>
+      <div class="topbar-right">
+        <button class="topbar-avatar-btn">
+          <div class="avatar avatar-sm" style="background:#5a8a3a;">NA</div>
+          <span class="topbar-name">Nguyễn Admin</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1 class="page-title">Phân công ảnh</h1>
+        <div class="page-actions">
+          <button class="btn btn-primary" onclick="document.getElementById('autoAssignModal').style.display='flex'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M20 12h-1M4 12H3M17.66 17.66l-1.41-1.41M6.34 17.66l1.41-1.41M12 20v-1M12 4V3"/></svg>
+            Phân công tự động
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-bar">
+        <div class="summary-stat">
+          <div class="summary-stat__val">372</div>
+          <div class="summary-stat__label">Chưa phân công</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat__val">1,240</div>
+          <div class="summary-stat__label">Tổng ảnh</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat__val">868</div>
+          <div class="summary-stat__label">Đã phân công</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat__val">5</div>
+          <div class="summary-stat__label">Annotators</div>
+        </div>
+        <div style="flex:1;min-width:200px;">
+          <div style="display:flex;justify-content:space-between;font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-1);"><span>Phân công</span><span>70%</span></div>
+          <div class="progress"><div class="progress-bar" style="width:70%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Annotators table -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;">
+          <span class="card-title">Danh sách Annotators</span>
+          <span class="text-sm text-muted">5 thành viên</span>
+        </div>
+        <div class="table-wrapper" style="border:none;border-radius:0;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Annotator</th>
+                <th>Đang làm</th>
+                <th>Hoàn thành</th>
+                <th>Tỉ lệ duyệt</th>
+                <th>Quota / ngày</th>
+                <th>Giao thêm</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar avatar-sm" style="background:#2b6cb0;">TB</div>
+                    <div>
+                      <div class="font-medium">Trần Bình</div>
+                      <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Annotator</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="font-medium">80</span></td>
+                <td><span class="font-medium" style="color:var(--color-approved);">320</span></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-2);">
+                    <div class="progress" style="width:60px;"><div class="progress-bar success" style="width:92%;"></div></div>
+                    <span class="text-sm">92%</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="quota-bar">
+                    <input type="number" class="assign-input" value="50" min="1" max="200">
+                    <span class="text-xs text-muted">ảnh/ngày</span>
+                  </div>
+                </td>
+                <td>
+                  <div style="display:flex;gap:var(--space-2);align-items:center;">
+                    <input type="number" class="assign-input" placeholder="SL" min="1">
+                    <button class="btn btn-primary btn-sm" onclick="showToast('Đã giao thêm ảnh cho Trần Bình')">Giao</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar avatar-sm" style="background:#ba7517;">LC</div>
+                    <div>
+                      <div class="font-medium">Lê Chi</div>
+                      <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Annotator</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="font-medium">60</span></td>
+                <td><span class="font-medium" style="color:var(--color-approved);">280</span></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-2);">
+                    <div class="progress" style="width:60px;"><div class="progress-bar success" style="width:88%;"></div></div>
+                    <span class="text-sm">88%</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="quota-bar">
+                    <input type="number" class="assign-input" value="40" min="1">
+                    <span class="text-xs text-muted">ảnh/ngày</span>
+                  </div>
+                </td>
+                <td>
+                  <div style="display:flex;gap:var(--space-2);align-items:center;">
+                    <input type="number" class="assign-input" placeholder="SL" min="1">
+                    <button class="btn btn-primary btn-sm" onclick="showToast('Đã giao thêm ảnh cho Lê Chi')">Giao</button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Overdue row -->
+              <tr class="overdue-row">
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar avatar-sm" style="background:#6b3fb0;">PD</div>
+                    <div>
+                      <div style="display:flex;align-items:center;gap:var(--space-2);">
+                        <span class="font-medium">Phạm Dũng</span>
+                        <span class="badge badge-pending" style="font-size:9px;padding:.1em .4em;">Quá hạn</span>
+                      </div>
+                      <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Annotator</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="font-medium" style="color:var(--color-pending);">120</span></td>
+                <td><span class="font-medium" style="color:var(--color-approved);">268</span></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-2);">
+                    <div class="progress" style="width:60px;"><div class="progress-bar warning" style="width:75%;"></div></div>
+                    <span class="text-sm">75%</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="quota-bar">
+                    <input type="number" class="assign-input" value="60" min="1">
+                    <span class="text-xs text-muted">ảnh/ngày</span>
+                  </div>
+                </td>
+                <td>
+                  <div style="display:flex;gap:var(--space-2);align-items:center;">
+                    <input type="number" class="assign-input" placeholder="SL" min="1">
+                    <button class="btn btn-primary btn-sm">Giao</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar avatar-sm" style="background:#3b8a5a;">HN</div>
+                    <div>
+                      <div class="font-medium">Hoàng Nam</div>
+                      <div style="font-size:var(--text-xs);color:var(--color-text-muted);">Annotator</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="font-medium">0</span></td>
+                <td><span class="font-medium" style="color:var(--color-approved);">0</span></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-2);">
+                    <div class="progress" style="width:60px;"><div class="progress-bar" style="width:0%;"></div></div>
+                    <span class="text-sm text-muted">—</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="quota-bar">
+                    <input type="number" class="assign-input" value="50" min="1">
+                    <span class="text-xs text-muted">ảnh/ngày</span>
+                  </div>
+                </td>
+                <td>
+                  <div style="display:flex;gap:var(--space-2);align-items:center;">
+                    <input type="number" class="assign-input" placeholder="SL" min="1">
+                    <button class="btn btn-primary btn-sm" onclick="showToast('Đã giao ảnh cho Hoàng Nam')">Giao</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Auto assign modal -->
+<div class="modal-overlay" id="autoAssignModal" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Phân công tự động</h3>
+      <button class="btn btn-ghost btn-icon" onclick="document.getElementById('autoAssignModal').style.display='none'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:var(--space-4);">
+        <div class="form-group">
+          <label class="form-label">Phương thức phân bổ</label>
+          <select class="select">
+            <option>Chia đều theo số lượng annotators</option>
+            <option>Theo quota từng người</option>
+            <option>Theo tỉ lệ hoàn thành</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ảnh cần phân công</label>
+          <select class="select">
+            <option>Tất cả ảnh chưa phân công (372)</option>
+            <option>Chỉ 100 ảnh đầu tiên</option>
+            <option>Tùy chọn...</option>
+          </select>
+        </div>
+        <div style="background:var(--color-bg);border-radius:var(--radius);padding:var(--space-4);font-size:var(--text-sm);">
+          <div style="font-weight:600;margin-bottom:var(--space-2);">Xem trước phân bổ:</div>
+          <div style="display:flex;flex-direction:column;gap:var(--space-2);">
+            <div style="display:flex;justify-content:space-between;"><span>Trần Bình</span><span class="font-medium">93 ảnh</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>Lê Chi</span><span class="font-medium">93 ảnh</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>Phạm Dũng</span><span class="font-medium">93 ảnh</span></div>
+            <div style="display:flex;justify-content:space-between;"><span>Hoàng Nam</span><span class="font-medium">93 ảnh</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('autoAssignModal').style.display='none'">Hủy</button>
+      <button class="btn btn-primary" onclick="document.getElementById('autoAssignModal').style.display='none';showToast('Đã phân công tự động 372 ảnh','success')">Xác nhận phân công</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  function showToast(msg, type = '') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type ? 'toast-' + type : ''}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
+  }
+</script>
+  <script src="../components/sidebar.js"></script>
+</body>
+</html>

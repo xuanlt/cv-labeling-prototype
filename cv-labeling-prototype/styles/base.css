@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+
+/* ─── CSS Custom Properties ─────────────────────────────── */
+
+:root {
+  /* Colors — Light */
+  --color-bg:           #f0f3f7;
+  --color-surface:      #ffffff;
+  --color-border:       #dee2e6;
+  --color-text:         #212529;
+  --color-text-muted:   #6c757d;
+  --color-accent:       #124680;
+  --color-accent-hover: #0d3565;
+  --color-accent-light: #e8edf4;
+
+  /* Status Colors */
+  --color-unassigned:        #888780;
+  --color-unassigned-bg:     #f2f2f0;
+  --color-in-progress:       #124680;
+  --color-in-progress-bg:    #e8edf4;
+  --color-pending:           #BA7517;
+  --color-pending-bg:        #fef3dc;
+  --color-approved:          #27AE60;
+  --color-approved-bg:       #e8f5ef;
+  --color-danger:            #c0392b;
+  --color-danger-bg:         #fdeaea;
+  --color-danger-hover:      #a93226;
+
+  /* Sidebar — Dark Navy (ASI Brand) */
+  --sidebar-bg:           linear-gradient(to right bottom, #0b2a4d, #0e2d51, #113155, #13345a, #16385e);
+  --sidebar-text:         #ffffff;
+  --sidebar-text-muted:   rgba(255,255,255,0.55);
+  --sidebar-border:       rgba(255,255,255,0.1);
+  --sidebar-hover-bg:     rgba(255,255,255,0.08);
+  --sidebar-active-bg:    rgba(255,255,255,0.18);
+  --sidebar-active-color: #00EAFF;
+
+  /* Canvas Editor (Dark) */
+  --color-canvas-bg:    #1c1c1e;
+  --color-sidebar-dark: #242424;
+  --color-toolbar-dark: #2a2a2a;
+  --color-border-dark:  #3a3a3a;
+  --color-text-dark:    #e8e8e6;
+  --color-text-muted-dark: #8a8a88;
+
+  /* Spacing scale (base 4px) */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Border radius */
+  --radius-sm: 3px;
+  --radius:    4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body:    'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono:    'SF Mono', 'Fira Code', monospace;
+
+  --text-xs:   11px;
+  --text-sm:   13px;
+  --text-base: 15px;
+  --text-lg:   18px;
+  --text-xl:   22px;
+  --text-2xl:  28px;
+
+  --leading-tight: 1.15;
+  --leading-normal: 1.6;
+
+  /* Shadows */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.07);
+  --shadow:     0 2px 8px rgba(0,0,0,0.09);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.12);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.16);
+
+  /* Transitions */
+  --transition: 150ms ease;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --topbar-height: 56px;
+}
+
+
+/* ─── Reset ─────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* ─── Typography ─────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  color: var(--color-text);
+}
+
+h1 { font-size: var(--text-2xl); }
+h2 { font-size: var(--text-xl); }
+h3 { font-size: var(--text-lg); }
+h4 { font-size: var(--text-base); font-weight: 600; }
+
+p {
+  max-width: 65ch;
+  line-height: var(--leading-normal);
+}
+
+small {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-border);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Utility Classes ─────────────────────────────────────── */
+
+.text-muted  { color: var(--color-text-muted); }
+.text-sm     { font-size: var(--text-sm); }
+.text-xs     { font-size: var(--text-xs); }
+.text-accent { color: var(--color-accent); }
+.text-danger { color: var(--color-danger); }
+
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+
+.flex       { display: flex; }
+.flex-col   { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-1  { gap: var(--space-1); }
+.gap-2  { gap: var(--space-2); }
+.gap-3  { gap: var(--space-3); }
+.gap-4  { gap: var(--space-4); }
+.gap-6  { gap: var(--space-6); }
+
+.mt-2 { margin-top: var(--space-2); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-6 { margin-bottom: var(--space-6); }
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }

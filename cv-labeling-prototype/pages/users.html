@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản lý người dùng — CVLabel</title>
+  <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    .app-shell { display:flex; height:100vh; overflow:hidden; }
+    .sidebar { width:var(--sidebar-width); height:100vh; background:var(--color-surface); border-right:1px solid var(--color-border); display:flex; flex-direction:column; flex-shrink:0; }
+    .sidebar-logo { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-4); height:var(--topbar-height); border-bottom:1px solid var(--color-border); }
+    .sidebar-logo__icon { width:28px; height:28px; background:var(--color-accent); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; }
+    .sidebar-logo__icon svg { color:white; width:16px; height:16px; }
+    .sidebar-logo__text { font-family:var(--font-heading); font-size:var(--text-lg); font-weight:600; }
+    .sidebar-nav { flex:1; overflow-y:auto; padding:var(--space-3) 0; }
+    .nav-item { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-2) var(--space-4); font-size:var(--text-sm); font-weight:500; color:var(--color-text-muted); text-decoration:none; transition:all var(--transition); }
+    .nav-item svg { width:18px; height:18px; flex-shrink:0; }
+    .nav-item:hover { background:var(--color-bg); color:var(--color-text); text-decoration:none; }
+    .nav-item.active { background:var(--color-accent-light); color:var(--color-accent); }
+    .nav-group { margin-bottom:2px; }
+    .nav-group-hd { display:flex; align-items:center; gap:6px; width:100%; padding:5px var(--space-3); background:none; border:none; cursor:pointer; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--color-text-muted); border-radius:var(--radius-sm); text-align:left; transition:background var(--transition),color var(--transition); }
+    .nav-group-hd:hover { background:var(--color-bg); color:var(--color-text); }
+    .nav-group-chevron { margin-left:auto; transition:transform .15s; flex-shrink:0; }
+    .nav-group-hd.collapsed .nav-group-chevron { transform:rotate(-90deg); }
+    .nav-group-bd { padding-bottom:var(--space-2); }
+    .nav-group-bd.hidden { display:none; }
+    .sidebar-footer { padding:var(--space-4); border-top:1px solid var(--color-border); }
+    .user-row { display:flex; align-items:center; gap:var(--space-3); }
+    .user-row__name { font-size:var(--text-sm); font-weight:500; }
+    .user-row__role { font-size:var(--text-xs); color:var(--color-text-muted); }
+    .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+    .topbar { height:var(--topbar-height); background:var(--color-surface); border-bottom:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; padding:0 var(--space-6); flex-shrink:0; }
+    .breadcrumb { display:flex; align-items:center; gap:var(--space-2); font-size:var(--text-sm); }
+    .breadcrumb a { color:var(--color-text-muted); text-decoration:none; }
+    .breadcrumb a:hover { color:var(--color-text); }
+    .breadcrumb-sep { color:var(--color-border); }
+    .breadcrumb-current { font-weight:500; }
+    .topbar-right { display:flex; align-items:center; gap:var(--space-3); }
+    .topbar-avatar-btn { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-1) var(--space-2); background:none; border:1px solid transparent; border-radius:var(--radius); cursor:pointer; transition:all var(--transition); }
+    .topbar-avatar-btn:hover { background:var(--color-bg); border-color:var(--color-border); }
+    .topbar-name { font-size:var(--text-sm); font-weight:500; }
+    .main-content { flex:1; overflow-y:auto; padding:var(--space-6); }
+
+    /* ── Modal / confirm ── */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:100; opacity:0; pointer-events:none; transition:opacity .15s; }
+    .modal-overlay.open { opacity:1; pointer-events:auto; }
+    .modal-box { background:var(--color-surface); border-radius:var(--radius-lg); border:1px solid var(--color-border); width:100%; padding:var(--space-6); box-shadow:0 8px 32px rgba(0,0,0,.12); }
+    .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-5); }
+    .modal-title { font-size:var(--text-lg); font-weight:600; }
+    .modal-close { background:none; border:none; cursor:pointer; color:var(--color-text-muted); padding:var(--space-1); border-radius:var(--radius-sm); display:flex; }
+    .modal-close:hover { background:var(--color-bg); }
+    .confirm-dialog { position:fixed; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:110; opacity:0; pointer-events:none; transition:opacity .1s; }
+    .confirm-dialog.open { opacity:1; pointer-events:auto; }
+    .confirm-box { background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-5); max-width:380px; width:100%; box-shadow:0 4px 20px rgba(0,0,0,.12); }
+    .confirm-box__title { font-weight:600; margin-bottom:var(--space-2); }
+    .confirm-box__desc { font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-5); line-height:1.6; }
+    .confirm-box__actions { display:flex; gap:var(--space-3); justify-content:flex-end; }
+    #toast { position:fixed; bottom:24px; right:24px; background:var(--color-text); color:#fff; padding:.6rem 1rem; border-radius:var(--radius); font-size:var(--text-sm); opacity:0; transition:opacity .2s; pointer-events:none; z-index:200; max-width:320px; }
+
+    /* ── Page-specific ── */
+    .stats-bar { display:flex; gap:var(--space-5); margin-bottom:var(--space-5); flex-wrap:wrap; }
+    .stat-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:var(--space-4) var(--space-5); display:flex; flex-direction:column; gap:var(--space-1); flex:1; min-width:100px; }
+    .stat-card__val { font-size:var(--text-xl); font-weight:700; font-family:var(--font-heading); }
+    .stat-card__label { font-size:var(--text-xs); color:var(--color-text-muted); }
+    .filter-bar { display:flex; align-items:center; gap:var(--space-3); margin-bottom:var(--space-4); flex-wrap:wrap; }
+    .search-wrap { position:relative; flex:1; min-width:200px; max-width:320px; }
+    .search-wrap svg { position:absolute; left:10px; top:50%; transform:translateY(-50%); pointer-events:none; color:var(--color-text-muted); }
+    .search-input { width:100%; height:34px; border:1px solid var(--color-border); border-radius:var(--radius-sm); padding:0 var(--space-3) 0 32px; font-family:inherit; font-size:var(--text-sm); background:var(--color-surface); outline:none; }
+    .search-input:focus { border-color:var(--color-accent); }
+    .filter-chips { display:flex; gap:var(--space-1); }
+    .filter-chip { padding:.2rem .7rem; border-radius:99px; border:1px solid var(--color-border); font-size:var(--text-xs); font-weight:500; cursor:pointer; background:var(--color-surface); color:var(--color-text-muted); transition:all var(--transition); }
+    .filter-chip:hover { border-color:var(--color-accent); color:var(--color-accent); }
+    .filter-chip.active { background:var(--color-accent-light); color:var(--color-accent); border-color:var(--color-accent); }
+    .user-inactive td { opacity:.55; }
+    .user-inactive td:last-child { opacity:1; }
+    .user-pending td { background:color-mix(in srgb,#fffbeb 50%,var(--color-surface)) !important; }
+    .inline-role-wrap { position:relative; display:inline-flex; align-items:center; gap:var(--space-2); }
+    .inline-role-select { display:none; position:absolute; top:100%; left:0; margin-top:4px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); box-shadow:0 4px 16px rgba(0,0,0,.1); padding:var(--space-1); z-index:20; min-width:140px; }
+    .inline-role-select.open { display:block; }
+    .role-opt { padding:var(--space-2) var(--space-3); font-size:var(--text-sm); cursor:pointer; border-radius:var(--radius-sm); display:flex; align-items:center; gap:var(--space-2); }
+    .role-opt:hover { background:var(--color-bg); }
+    .projects-cell { display:flex; align-items:center; gap:var(--space-2); color:var(--color-text-muted); font-size:var(--text-sm); }
+    .empty-state { text-align:center; padding:var(--space-6) var(--space-5); color:var(--color-text-muted); font-size:var(--text-sm); }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar-placeholder"></aside>
+
+  <!-- Main -->
+  <div class="main-area">
+    <header class="topbar">
+      <nav class="breadcrumb">
+        <a href="#">CVLabel</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">Người dùng</span>
+      </nav>
+      <div class="topbar-right">
+        <button class="topbar-avatar-btn">
+          <div class="avatar avatar-sm" style="background:#5a8a3a;">NA</div>
+          <span class="topbar-name">Nguyễn Admin</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <!-- Page header -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:var(--space-4);margin-bottom:var(--space-5);">
+        <div>
+          <h1 style="font-family:var(--font-heading);font-size:var(--text-xl);font-weight:700;line-height:1.15;margin-bottom:var(--space-1);">Quản lý người dùng</h1>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);">Quản lý tài khoản, vai trò hệ thống và quyền truy cập.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openInviteModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Mời người dùng
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-card__val">8</div>
+          <div class="stat-card__label">Tổng tài khoản</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__val" style="color:var(--color-approved);">7</div>
+          <div class="stat-card__label">Đang hoạt động</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__val" style="color:var(--color-accent);">2</div>
+          <div class="stat-card__label">Admin hệ thống</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__val" style="color:var(--color-text-muted);">1</div>
+          <div class="stat-card__label">Ngừng hoạt động</div>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="search-input" placeholder="Tìm theo tên hoặc email...">
+        </div>
+        <div class="filter-chips">
+          <button class="filter-chip active" onclick="setFilter(this)">Tất cả</button>
+          <button class="filter-chip" onclick="setFilter(this)">Admin</button>
+          <button class="filter-chip" onclick="setFilter(this)">Member</button>
+          <button class="filter-chip" onclick="setFilter(this)">Ngừng HĐ</button>
+          <button class="filter-chip" onclick="setFilter(this)">Đã mời</button>
+        </div>
+      </div>
+
+      <!-- Users table -->
+      <div class="table-wrapper">
+        <table class="table">
+            <thead>
+              <tr>
+                <th>Người dùng</th>
+                <th>Vai trò hệ thống</th>
+                <th>Dự án</th>
+                <th>Hoạt động cuối</th>
+                <th>Trạng thái</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <!-- Admin rows -->
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar" style="background:#5a8a3a;">NA</div>
+                    <div>
+                      <div class="font-medium">Nguyễn Admin</div>
+                      <div style="font-size:11px;color:var(--color-text-muted);">admin@cvlabel.ai</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="inline-role-wrap" id="role-wrap-1">
+                    <span class="badge badge-admin">Admin</span>
+                    <button class="btn btn-ghost btn-sm" onclick="openRoleSelect('role-wrap-1')" title="Đổi vai trò" style="padding:2px 4px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <div class="inline-role-select" id="role-select-1">
+                      <div class="role-opt" onclick="changeRole('role-wrap-1','role-select-1','Admin','badge-admin','Nguyễn Admin')"><span class="badge badge-admin">Admin</span></div>
+                      <div class="role-opt" onclick="changeRole('role-wrap-1','role-select-1','Member','badge-member','Nguyễn Admin')"><span class="badge badge-member">Member</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="projects-cell"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>5 dự án</span></td>
+                <td style="color:var(--color-text-muted);">Hôm nay</td>
+                <td><span class="badge badge-active">Hoạt động</span></td>
+                <td>
+                  <div style="display:flex;gap:var(--space-1);">
+                    <button class="btn btn-ghost btn-sm" onclick="showToast('Đã gửi email đặt lại mật khẩu')">Đặt lại MK</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar" style="background:#2b7a6b;">TA</div>
+                    <div>
+                      <div class="font-medium">Lê Thanh Admin</div>
+                      <div style="font-size:11px;color:var(--color-text-muted);">thanh.admin@cvlabel.ai</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="inline-role-wrap" id="role-wrap-2">
+                    <span class="badge badge-admin">Admin</span>
+                    <button class="btn btn-ghost btn-sm" onclick="openRoleSelect('role-wrap-2')" title="Đổi vai trò" style="padding:2px 4px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <div class="inline-role-select" id="role-select-2">
+                      <div class="role-opt" onclick="changeRole('role-wrap-2','role-select-2','Admin','badge-admin','Lê Thanh Admin')"><span class="badge badge-admin">Admin</span></div>
+                      <div class="role-opt" onclick="changeRole('role-wrap-2','role-select-2','Member','badge-member','Lê Thanh Admin')"><span class="badge badge-member">Member</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="projects-cell"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>3 dự án</span></td>
+                <td style="color:var(--color-text-muted);">2 ngày trước</td>
+                <td><span class="badge badge-active">Hoạt động</span></td>
+                <td>
+                  <div style="display:flex;gap:var(--space-1);">
+                    <button class="btn btn-ghost btn-sm" onclick="showToast('Đã gửi email đặt lại mật khẩu')">Đặt lại MK</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--color-text-muted);" onclick="openDeactivate('Lê Thanh Admin')" title="Ngừng hoạt động">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Member rows -->
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar" style="background:#6b3fb0;">PD</div>
+                    <div>
+                      <div class="font-medium">Phạm Dũng</div>
+                      <div style="font-size:11px;color:var(--color-text-muted);">dung.pham@cvlabel.ai</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="inline-role-wrap" id="role-wrap-3">
+                    <span class="badge badge-member">Member</span>
+                    <button class="btn btn-ghost btn-sm" onclick="openRoleSelect('role-wrap-3')" title="Đổi vai trò" style="padding:2px 4px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <div class="inline-role-select" id="role-select-3">
+                      <div class="role-opt" onclick="changeRole('role-wrap-3','role-select-3','Admin','badge-admin','Phạm Dũng')"><span class="badge badge-admin">Admin</span></div>
+                      <div class="role-opt" onclick="changeRole('role-wrap-3','role-select-3','Member','badge-member','Phạm Dũng')"><span class="badge badge-member">Member</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="projects-cell"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>3 dự án</span></td>
+                <td style="color:var(--color-text-muted);">Hôm nay</td>
+                <td><span class="badge badge-active">Hoạt động</span></td>
+                <td>
+                  <div style="display:flex;gap:var(--space-1);">
+                    <button class="btn btn-ghost btn-sm" onclick="openDeactivate('Phạm Dũng')">Ngừng HĐ</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar" style="background:#2b7a6b;">HN</div>
+                    <div>
+                      <div class="font-medium">Hoàng Nga</div>
+                      <div style="font-size:11px;color:var(--color-text-muted);">nga.hoang@cvlabel.ai</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="inline-role-wrap" id="role-wrap-4">
+                    <span class="badge badge-member">Member</span>
+                    <button class="btn btn-ghost btn-sm" onclick="openRoleSelect('role-wrap-4')" title="Đổi vai trò" style="padding:2px 4px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <div class="inline-role-select" id="role-select-4">
+                      <div class="role-opt" onclick="changeRole('role-wrap-4','role-select-4','Admin','badge-admin','Hoàng Nga')"><span class="badge badge-admin">Admin</span></div>
+                      <div class="role-opt" onclick="changeRole('role-wrap-4','role-select-4','Member','badge-member','Hoàng Nga')"><span class="badge badge-member">Member</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="projects-cell"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>2 dự án</span></td>
+                <td style="color:var(--color-text-muted);">Hôm qua</td>
+                <td><span class="badge badge-active">Hoạt động</span></td>
+                <td>
+                  <div style="display:flex;gap:var(--space-1);">
+                    <button class="btn btn-ghost btn-sm" onclick="openDeactivate('Hoàng Nga')">Ngừng HĐ</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar" style="background:#b05a2b;">VT</div>
+                    <div>
+                      <div class="font-medium">Vũ Thanh</div>
+                      <div style="font-size:11px;color:var(--color-text-muted);">thanh.vu@cvlabel.ai</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="inline-role-wrap" id="role-wrap-5">
+                    <span class="badge badge-member">Member</span>
+                    <button class="btn btn-ghost btn-sm" onclick="openRoleSelect('role-wrap-5')" title="Đổi vai trò" style="padding:2px 4px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <div class="inline-role-select" id="role-select-5">
+                      <div class="role-opt" onclick="changeRole('role-wrap-5','role-select-5','Admin','badge-admin','Vũ Thanh')"><span class="badge badge-admin">Admin</span></div>
+                      <div class="role-opt" onclick="changeRole('role-wrap-5','role-select-5','Member','badge-member','Vũ Thanh')"><span class="badge badge-member">Member</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="projects-cell"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>4 dự án</span></td>
+                <td style="color:var(--color-text-muted);">3 ngày trước</td>
+                <td><span class="badge badge-active">Hoạt động</span></td>
+                <td>
+                  <div style="display:flex;gap:var(--space-1);">
+                    <button class="btn btn-ghost btn-sm" onclick="openDeactivate('Vũ Thanh')">Ngừng HĐ</button>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar" style="background:#2b4cb0;">KA</div>
+                    <div>
+                      <div class="font-medium">Kim Anh</div>
+                      <div style="font-size:11px;color:var(--color-text-muted);">anh.kim@cvlabel.ai</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="inline-role-wrap" id="role-wrap-6">
+                    <span class="badge badge-member">Member</span>
+                    <button class="btn btn-ghost btn-sm" onclick="openRoleSelect('role-wrap-6')" title="Đổi vai trò" style="padding:2px 4px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <div class="inline-role-select" id="role-select-6">
+                      <div class="role-opt" onclick="changeRole('role-wrap-6','role-select-6','Admin','badge-admin','Kim Anh')"><span class="badge badge-admin">Admin</span></div>
+                      <div class="role-opt" onclick="changeRole('role-wrap-6','role-select-6','Member','badge-member','Kim Anh')"><span class="badge badge-member">Member</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="projects-cell"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>1 dự án</span></td>
+                <td style="color:var(--color-text-muted);">1 tuần trước</td>
+                <td><span class="badge badge-active">Hoạt động</span></td>
+                <td>
+                  <div style="display:flex;gap:var(--space-1);">
+                    <button class="btn btn-ghost btn-sm" onclick="openDeactivate('Kim Anh')">Ngừng HĐ</button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Inactive user -->
+              <tr class="user-inactive">
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar" style="background:#888;">TB</div>
+                    <div>
+                      <div class="font-medium">Trần Bình</div>
+                      <div style="font-size:11px;color:var(--color-text-muted);">binh.tran@cvlabel.ai</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge badge-member">Member</span></td>
+                <td><span class="projects-cell" style="color:var(--color-text-muted);">—</span></td>
+                <td style="color:var(--color-text-muted);">1 tháng trước</td>
+                <td><span class="badge badge-inactive">Ngừng HĐ</span></td>
+                <td>
+                  <div style="display:flex;gap:var(--space-1);">
+                    <button class="btn btn-ghost btn-sm" onclick="showToast('Đã kích hoạt tài khoản Trần Bình')">Kích hoạt</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--color-danger);" onclick="openDeleteUser('Trần Bình')">Xóa</button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Pending invitation -->
+              <tr class="user-pending">
+                <td>
+                  <div style="display:flex;align-items:center;gap:var(--space-3);">
+                    <div class="avatar" style="background:#c0b8a8;border:2px dashed #aaa;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div>
+                      <div class="font-medium" style="color:var(--color-text-muted);">new.member@company.ai</div>
+                      <div style="font-size:11px;color:var(--color-pending);">Đã gửi lời mời · 3 ngày trước</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="badge badge-member">Member</span></td>
+                <td><span style="color:var(--color-text-muted);">—</span></td>
+                <td style="color:var(--color-text-muted);">—</td>
+                <td><span class="badge badge-pending">Đã mời</span></td>
+                <td>
+                  <div style="display:flex;gap:var(--space-1);">
+                    <button class="btn btn-ghost btn-sm" onclick="showToast('Đã gửi lại lời mời')">Gửi lại</button>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--color-text-muted);" onclick="showToast('Đã hủy lời mời')">Hủy</button>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+      </div>
+
+    </main>
+  </div><!-- /main-area -->
+</div><!-- /app-shell -->
+
+<!-- Modal: Invite user -->
+<div class="modal-overlay" id="modal-invite" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <span class="modal-title">Mời người dùng</span>
+      <button class="modal-close" onclick="document.getElementById('modal-invite').classList.remove('open')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--space-4);margin-bottom:var(--space-5);">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="input" id="invite-email" placeholder="vd: nguyen.a@company.ai" onkeydown="if(event.key==='Enter')addInviteEmail()">
+        <div style="display:flex;gap:var(--space-2);margin-top:var(--space-2);">
+          <button class="btn btn-secondary btn-sm" onclick="addInviteEmail()">+ Thêm email</button>
+        </div>
+        <!-- Staged invite list -->
+        <div id="invite-list" style="display:flex;flex-direction:column;gap:var(--space-2);margin-top:var(--space-2);min-height:4px;"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Vai trò hệ thống</label>
+        <select class="select" id="invite-role" style="width:200px;">
+          <option value="member" selected>Member</option>
+          <option value="admin">Admin</option>
+        </select>
+        <div style="font-size:11px;color:var(--color-text-muted);margin-top:4px;">Member có thể được thêm vào dự án. Admin quản lý toàn hệ thống.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ghi chú <span style="font-size:11px;color:var(--color-text-muted);font-weight:400;">(tùy chọn)</span></label>
+        <textarea class="textarea" id="invite-note" rows="2" placeholder="Tin nhắn kèm theo email mời..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:var(--space-3);">
+      <button class="btn btn-secondary" onclick="document.getElementById('modal-invite').classList.remove('open')">Hủy</button>
+      <button class="btn btn-primary" onclick="confirmInvite()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Gửi lời mời
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm: Deactivate -->
+<div class="confirm-dialog" id="confirm-deactivate" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="confirm-box">
+    <div class="confirm-box__title" id="deactivate-title">Ngừng hoạt động?</div>
+    <div class="confirm-box__desc" id="deactivate-desc"></div>
+    <div class="confirm-box__actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('confirm-deactivate').classList.remove('open')">Hủy</button>
+      <button class="btn btn-danger" onclick="doDeactivate()">Ngừng hoạt động</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm: Delete user -->
+<div class="confirm-dialog" id="confirm-delete-user" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="confirm-box">
+    <div class="confirm-box__title" id="delete-user-title">Xóa tài khoản?</div>
+    <div class="confirm-box__desc" id="delete-user-desc"></div>
+    <div class="confirm-box__actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('confirm-delete-user').classList.remove('open')">Hủy</button>
+      <button class="btn btn-danger" onclick="doDeleteUser()">Xóa vĩnh viễn</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+  }
+
+  function setFilter(btn) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  /* ── Role change inline ── */
+  function openRoleSelect(wrapId) {
+    const sel = document.getElementById(wrapId.replace('role-wrap', 'role-select'));
+    sel.classList.toggle('open');
+    document.addEventListener('click', function close(e) {
+      if (!document.getElementById(wrapId).contains(e.target)) {
+        sel.classList.remove('open');
+        document.removeEventListener('click', close);
+      }
+    });
+  }
+
+  function changeRole(wrapId, selId, role, badgeClass, name) {
+    const wrap = document.getElementById(wrapId);
+    const badge = wrap.querySelector('.badge');
+    badge.textContent = role;
+    badge.className = 'badge ' + badgeClass;
+    document.getElementById(selId).classList.remove('open');
+    showToast(`Đã cập nhật vai trò của ${name} thành ${role}`);
+  }
+
+  /* ── Invite ── */
+  const pendingInvites = [];
+
+  function openInviteModal() {
+    document.getElementById('modal-invite').classList.add('open');
+    document.getElementById('invite-email').value = '';
+    document.getElementById('invite-note').value = '';
+    pendingInvites.length = 0;
+    renderInviteList();
+    setTimeout(() => document.getElementById('invite-email').focus(), 50);
+  }
+
+  function addInviteEmail() {
+    const val = document.getElementById('invite-email').value.trim();
+    if (!val || !val.includes('@')) return;
+    if (!pendingInvites.includes(val)) {
+      pendingInvites.push(val);
+      renderInviteList();
+    }
+    document.getElementById('invite-email').value = '';
+    document.getElementById('invite-email').focus();
+  }
+
+  function renderInviteList() {
+    const list = document.getElementById('invite-list');
+    list.innerHTML = pendingInvites.map((e, i) => `
+      <div style="display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2) var(--space-3);background:var(--color-bg);border-radius:4px;font-size:var(--text-sm);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span style="flex:1;">${e}</span>
+        <button style="background:none;border:none;cursor:pointer;color:var(--color-text-muted);font-size:16px;line-height:1;padding:0 2px;" onclick="removePendingInvite(${i})">×</button>
+      </div>`).join('');
+  }
+
+  function removePendingInvite(i) {
+    pendingInvites.splice(i, 1);
+    renderInviteList();
+  }
+
+  function confirmInvite() {
+    const email = document.getElementById('invite-email').value.trim();
+    if (email && email.includes('@')) pendingInvites.push(email);
+    if (pendingInvites.length === 0) {
+      showToast('Nhập ít nhất một địa chỉ email');
+      return;
+    }
+    const count = pendingInvites.length;
+    document.getElementById('modal-invite').classList.remove('open');
+    showToast(`Đã gửi lời mời đến ${count} người dùng`);
+  }
+
+  /* ── Deactivate ── */
+  let pendingDeactivateName = '';
+
+  function openDeactivate(name) {
+    pendingDeactivateName = name;
+    document.getElementById('deactivate-title').textContent = `Ngừng hoạt động "${name}"?`;
+    document.getElementById('deactivate-desc').textContent =
+      `Tài khoản ${name} sẽ không thể đăng nhập. Dữ liệu và lịch sử annotation được giữ nguyên. Có thể kích hoạt lại bất kỳ lúc nào.`;
+    document.getElementById('confirm-deactivate').classList.add('open');
+  }
+
+  function doDeactivate() {
+    document.getElementById('confirm-deactivate').classList.remove('open');
+    showToast(`Đã ngừng hoạt động tài khoản "${pendingDeactivateName}"`);
+  }
+
+  /* ── Delete ── */
+  let pendingDeleteName = '';
+
+  function openDeleteUser(name) {
+    pendingDeleteName = name;
+    document.getElementById('delete-user-title').textContent = `Xóa tài khoản "${name}"?`;
+    document.getElementById('delete-user-desc').textContent =
+      `Hành động này không thể hoàn tác. Toàn bộ dữ liệu của ${name} sẽ bị xóa vĩnh viễn.`;
+    document.getElementById('confirm-delete-user').classList.add('open');
+  }
+
+  function doDeleteUser() {
+    document.getElementById('confirm-delete-user').classList.remove('open');
+    showToast(`Đã xóa tài khoản "${pendingDeleteName}"`);
+  }
+</script>
+  <script src="../components/sidebar.js"></script>
+</body>
+</html>
