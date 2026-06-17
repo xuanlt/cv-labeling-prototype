@@ -5,289 +5,307 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CVLabel — Review Annotation</title>
   <link rel="stylesheet" href="../styles/base.css">
+  <link rel="stylesheet" href="../styles/components.css">
   <style>
+    /* ─── Canvas dark theme tokens ─────────────────────── */
     :root {
-      --editor-bg:       #060d18;
-      --editor-surface:  #091525;
-      --editor-toolbar:  #0c1c32;
-      --editor-border:   rgba(255,255,255,0.08);
-      --editor-text:     #d8e8f4;
-      --editor-muted:    rgba(160,200,235,0.48);
-      --editor-hover:    rgba(255,255,255,0.06);
-      --editor-active:   rgba(255,255,255,0.10);
-      --editor-accent:   #00EAFF;
-      --editor-panel-w:  240px;
-      --editor-right-w:  280px;
-      --editor-topbar-h: 48px;
+      --cv-bg:        #1c1c1e;
+      --cv-surface:   #242424;
+      --cv-toolbar:   #2a2a2a;
+      --cv-border:    #3a3a3a;
+      --cv-text:      #e8e8e6;
+      --cv-muted:     #8a8a88;
+      --cv-hover:     rgba(255,255,255,0.06);
+      --cv-active:    rgba(55,138,221,0.12);
+      --cv-accent:    #378ADD;
+      --cv-panel-w:   240px;
+      --cv-panel-rw:  280px;
     }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sans-serif; font-size: 13px; background: var(--editor-bg); color: var(--editor-text); -webkit-font-smoothing: antialiased; }
-    button { cursor: pointer; font-family: inherit; font-size: inherit; }
-    .editor-shell { display: flex; flex-direction: column; height: 100vh; }
 
-    .editor-topbar { height: var(--editor-topbar-h); background: var(--editor-surface); border-bottom: 1px solid var(--editor-border); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; flex-shrink: 0; gap: 12px; }
-    .editor-topbar__left { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .editor-logo { display: flex; align-items: center; gap: 6px; color: var(--editor-text); text-decoration: none; flex-shrink: 0; }
-    .editor-logo__icon { width: 24px; height: 24px; background: var(--editor-accent); border-radius: 4px; display: flex; align-items: center; justify-content: center; }
-    .editor-logo__icon svg { width: 14px; height: 14px; color: white; }
-    .editor-logo__name { font-weight: 600; font-size: 13px; }
-    .topbar-sep { width: 1px; height: 20px; background: var(--editor-border); flex-shrink: 0; }
-    .editor-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; }
-    .editor-breadcrumb a { color: var(--editor-muted); }
-    .editor-breadcrumb a:hover { color: var(--editor-text); }
-    .editor-breadcrumb-sep { color: var(--editor-border); }
-    .editor-breadcrumb-current { color: var(--editor-text); font-weight: 500; }
-    .editor-topbar__right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    /* ─── App shell & sidebar ───────────────────────────── */
+    .app-shell { display:flex; height:100vh; overflow:hidden; }
+    .sidebar { width:var(--sidebar-width); height:100vh; background:var(--sidebar-bg); border-right:1px solid var(--sidebar-border); display:flex; flex-direction:column; flex-shrink:0; }
+    .sidebar-logo { display:flex; align-items:center; gap:10px; padding:var(--space-4); height:var(--topbar-height); border-bottom:1px solid var(--sidebar-border); }
+    .sidebar-logo__text { font-size:13px; font-weight:700; color:rgba(255,255,255,0.75); letter-spacing:.06em; }
+    .sidebar-nav { flex:1; overflow-y:auto; padding:var(--space-3) 0; }
+    .nav-item { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-2) var(--space-4); font-size:var(--text-sm); font-weight:500; color:var(--sidebar-text-muted); text-decoration:none; transition:all var(--transition); }
+    .nav-item svg { width:18px; height:18px; flex-shrink:0; }
+    .nav-item:hover { background:var(--sidebar-hover-bg); color:var(--sidebar-text); text-decoration:none; }
+    .nav-item.active { background:var(--sidebar-active-bg); color:var(--sidebar-active-color); }
+    .nav-group { margin-bottom:2px; }
+    .nav-group-hd { display:flex; align-items:center; gap:6px; width:100%; padding:5px var(--space-3); background:none; border:none; cursor:pointer; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--sidebar-text-muted); border-radius:var(--radius-sm); text-align:left; transition:background var(--transition),color var(--transition); }
+    .nav-group-hd:hover { background:var(--sidebar-hover-bg); color:var(--sidebar-text); }
+    .nav-group-chevron { margin-left:auto; transition:transform .15s; flex-shrink:0; }
+    .nav-group-hd.collapsed .nav-group-chevron { transform:rotate(-90deg); }
+    .nav-group-bd { padding-bottom:var(--space-2); }
+    .nav-group-bd.hidden { display:none; }
+    .sidebar-footer { padding:var(--space-4); border-top:1px solid var(--sidebar-border); }
+    .user-row { display:flex; align-items:center; gap:var(--space-3); }
+    .user-row__name { font-size:var(--text-sm); font-weight:500; color:var(--sidebar-text); }
+    .user-row__role { font-size:var(--text-xs); color:var(--sidebar-text-muted); }
+    .avatar { display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; font-size:11px; font-weight:600; color:white; flex-shrink:0; }
+    .avatar-sm { width:26px; height:26px; font-size:10px; }
+    .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
 
-    .ebtn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; font-size: 12px; font-weight: 500; border-radius: 4px; border: 1px solid transparent; cursor: pointer; transition: background 150ms; white-space: nowrap; color: var(--editor-text); }
-    .ebtn svg { width: 13px; height: 13px; }
-    .ebtn-secondary { background: var(--editor-toolbar); border-color: var(--editor-border); }
-    .ebtn-secondary:hover { background: var(--editor-hover); }
-    .ebtn-approve { background: rgba(39,174,96,0.15); border-color: rgba(39,174,96,0.3); color: #5dd68a; }
-    .ebtn-approve:hover { background: rgba(39,174,96,0.25); }
-    .ebtn-reject { background: rgba(231,76,60,0.12); border-color: rgba(231,76,60,0.28); color: #f87171; }
-    .ebtn-reject:hover { background: rgba(231,76,60,0.22); }
+    /* ─── Light topbar ──────────────────────────────────── */
+    .topbar { height:var(--topbar-height); background:var(--color-surface); border-bottom:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; padding:0 var(--space-6); flex-shrink:0; gap:var(--space-3); }
+    .topbar-left { display:flex; align-items:center; gap:var(--space-3); min-width:0; overflow:hidden; }
+    .topbar-right { display:flex; align-items:center; gap:var(--space-2); flex-shrink:0; }
+    .breadcrumb { display:flex; align-items:center; gap:var(--space-2); font-size:var(--text-sm); overflow:hidden; }
+    .breadcrumb a { color:var(--color-text-muted); text-decoration:none; transition:color var(--transition); white-space:nowrap; }
+    .breadcrumb a:hover { color:var(--color-text); text-decoration:none; }
+    .breadcrumb-sep { color:var(--color-border); font-size:10px; }
+    .breadcrumb-current { color:var(--color-text); font-weight:500; white-space:nowrap; }
+    .batch-count { font-size:var(--text-xs); color:var(--color-text-muted); padding:3px 8px; background:var(--color-bg); border:1px solid var(--color-border); border-radius:var(--radius-full); }
 
-    .editor-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+    /* ─── Editor body (dark canvas) ─────────────────────── */
+    .editor-body { display:flex; flex:1; overflow:hidden; min-height:0; font-size:13px; color:var(--cv-text); font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
+
+    svg { display: block; }
 
     /* Left panel */
-    .panel-left { width: var(--editor-panel-w); background: var(--editor-surface); border-right: 1px solid var(--editor-border); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
-    .panel-section-header { padding: 10px 12px 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--editor-muted); border-bottom: 1px solid var(--editor-border); display: flex; align-items: center; justify-content: space-between; }
-    .img-list { flex: 1; overflow-y: auto; padding: 4px 0; }
-    .img-list-item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; cursor: pointer; transition: background 150ms; border-left: 2px solid transparent; }
-    .img-list-item:hover { background: var(--editor-hover); }
-    .img-list-item.active { background: rgba(0,234,255,0.10); border-left-color: var(--editor-accent); }
-    .img-thumb { width: 44px; height: 33px; border-radius: 3px; background: var(--editor-toolbar); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .img-thumb svg { width: 18px; height: 18px; color: var(--editor-muted); }
-    .img-list-item__name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .status-dot { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; }
-    .status-dot::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-    .status-dot.pending { color: #f0a732; }
-    .status-dot.approved { color: #4caf50; }
-    .status-dot.rejected { color: #f87171; }
-    .panel-nav { display: flex; border-top: 1px solid var(--editor-border); padding: 8px 12px; gap: 6px; flex-shrink: 0; }
-    .panel-nav .ebtn { flex: 1; justify-content: center; }
+    .panel-left { width:var(--cv-panel-w); background:var(--cv-surface); border-right:1px solid var(--cv-border); display:flex; flex-direction:column; flex-shrink:0; overflow:hidden; }
+    .panel-section-header { padding:10px 12px 8px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--cv-muted); border-bottom:1px solid var(--cv-border); display:flex; align-items:center; justify-content:space-between; }
+    .img-list { flex:1; overflow-y:auto; padding:4px 0; }
+    .img-list-item { display:flex; align-items:center; gap:8px; padding:6px 12px; cursor:pointer; transition:background 150ms; border-left:2px solid transparent; }
+    .img-list-item:hover { background:var(--cv-hover); }
+    .img-list-item.active { background:rgba(55,138,221,0.10); border-left-color:var(--cv-accent); }
+    .img-thumb { width:44px; height:33px; border-radius:3px; background:var(--cv-toolbar); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .img-thumb svg { width:18px; height:18px; color:var(--cv-muted); }
+    .img-list-item__name { font-size:11px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .status-dot { display:inline-flex; align-items:center; gap:4px; font-size:10px; }
+    .status-dot::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .status-dot.pending  { color:#f0a732; }
+    .status-dot.approved { color:#4caf50; }
+    .status-dot.rejected { color:#f87171; }
+    .panel-nav { display:flex; border-top:1px solid var(--cv-border); padding:8px 12px; gap:6px; flex-shrink:0; }
+    .panel-nav .ebtn { flex:1; justify-content:center; }
 
     /* Canvas */
-    .canvas-area { flex: 1; display: flex; flex-direction: column; background: var(--editor-bg); overflow: hidden; }
-    .canvas-viewport { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; cursor: default; }
-    .read-only-banner { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: var(--editor-muted); font-size: 11px; padding: 4px 12px; border-radius: 12px; z-index: 10; pointer-events: none; border: 1px solid var(--editor-border); }
-    .mock-image { width: 640px; height: 480px; background: #060d18; border: 1px solid var(--editor-border); position: relative; overflow: hidden; }
-    .mock-image::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, #0a1520 0%, #0f1e2e 20%, #08141e 40%, #0d1e14 60%, #0a1220 80%, #04080e 100%); }
-    .bbox { position: absolute; border: 2px solid; }
-    .bbox-label { position: absolute; top: -22px; left: -1px; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 3px 3px 0 0; white-space: nowrap; color: white; }
-    .polygon-overlay { position: absolute; inset: 0; pointer-events: none; }
-    .mock-image-label { position: absolute; bottom: 12px; left: 12px; font-size: 11px; color: rgba(255,255,255,0.4); font-family: monospace; }
-    .statusbar { height: 26px; background: var(--editor-surface); border-top: 1px solid var(--editor-border); display: flex; align-items: center; gap: 16px; padding: 0 12px; flex-shrink: 0; font-size: 11px; color: var(--editor-muted); }
-    .statusbar-sep { width: 1px; height: 12px; background: var(--editor-border); }
+    .canvas-area { flex:1; display:flex; flex-direction:column; background:var(--cv-bg); overflow:hidden; }
+    .canvas-viewport { flex:1; display:flex; align-items:center; justify-content:center; position:relative; cursor:default; overflow:hidden; }
+    .read-only-banner { position:absolute; top:12px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.55); color:var(--cv-muted); font-size:11px; padding:4px 12px; border-radius:12px; z-index:10; pointer-events:none; border:1px solid var(--cv-border); }
+    .mock-image { width:640px; height:480px; background:var(--cv-bg); border:1px solid var(--cv-border); position:relative; overflow:hidden; }
+    .mock-image::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,#141416 0%,#1a1e20 20%,#131618 40%,#181e14 60%,#141620 80%,#0e1010 100%); }
+    .bbox { position:absolute; border:2px solid; }
+    .bbox-label { position:absolute; top:-22px; left:-1px; font-size:10px; font-weight:600; padding:2px 6px; border-radius:3px 3px 0 0; white-space:nowrap; color:white; }
+    .polygon-overlay { position:absolute; inset:0; pointer-events:none; }
+    .mock-image-label { position:absolute; bottom:12px; left:12px; font-size:11px; color:rgba(255,255,255,0.4); font-family:monospace; }
+    .statusbar { height:26px; background:var(--cv-surface); border-top:1px solid var(--cv-border); display:flex; align-items:center; gap:16px; padding:0 12px; flex-shrink:0; font-size:11px; color:var(--cv-muted); }
+    .statusbar-sep { width:1px; height:12px; background:var(--cv-border); }
 
-    /* Right panel — Review form */
-    .panel-right { width: var(--editor-right-w); background: var(--editor-surface); border-left: 1px solid var(--editor-border); display: flex; flex-direction: column; overflow: hidden; }
-    .panel-scroll { flex: 1; overflow-y: auto; padding: 12px; }
-    .review-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--editor-muted); margin-bottom: 8px; }
-    .checklist-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; font-size: 12px; }
-    .checklist-item input { margin-top: 1px; accent-color: var(--editor-accent); width: 14px; height: 14px; }
-    .review-textarea { width: 100%; background: var(--editor-toolbar); border: 1px solid var(--editor-border); border-radius: 4px; color: var(--editor-text); padding: 8px; font-size: 12px; resize: vertical; outline: none; font-family: inherit; min-height: 80px; }
-    .review-textarea:focus { border-color: var(--editor-accent); }
-    .review-textarea::placeholder { color: var(--editor-muted); }
-    .panel-actions { padding: 12px; border-top: 1px solid var(--editor-border); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
-    .annotation-summary { background: var(--editor-toolbar); border-radius: 4px; padding: 8px 10px; font-size: 11px; }
-    .annotation-summary-row { display: flex; justify-content: space-between; margin-bottom: 4px; color: var(--editor-muted); }
-    .annotation-summary-row:last-child { margin-bottom: 0; }
-    .annotation-summary-row strong { color: var(--editor-text); }
+    /* Right panel — review form */
+    .panel-right { width:var(--cv-panel-rw); background:var(--cv-surface); border-left:1px solid var(--cv-border); display:flex; flex-direction:column; overflow:hidden; }
+    .panel-scroll { flex:1; overflow-y:auto; padding:12px; }
+    .review-label { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--cv-muted); margin-bottom:8px; }
+    .checklist-item { display:flex; align-items:flex-start; gap:8px; padding:6px 0; font-size:12px; color:var(--cv-text); }
+    .checklist-item input { margin-top:1px; accent-color:var(--cv-accent); width:14px; height:14px; }
+    .review-textarea { width:100%; background:var(--cv-toolbar); border:1px solid var(--cv-border); border-radius:4px; color:var(--cv-text); padding:8px; font-size:12px; resize:vertical; outline:none; font-family:inherit; min-height:80px; }
+    .review-textarea:focus { border-color:var(--cv-accent); }
+    .review-textarea::placeholder { color:var(--cv-muted); }
+    .panel-actions { padding:12px; border-top:1px solid var(--cv-border); display:flex; flex-direction:column; gap:8px; flex-shrink:0; }
+    .annotation-summary { background:var(--cv-toolbar); border-radius:4px; padding:8px 10px; font-size:11px; }
+    .annotation-summary-row { display:flex; justify-content:space-between; margin-bottom:4px; color:var(--cv-muted); }
+    .annotation-summary-row:last-child { margin-bottom:0; }
+    .annotation-summary-row strong { color:var(--cv-text); }
 
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--editor-border); border-radius: 2px; }
+    /* Canvas buttons */
+    .ebtn { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; font-size:12px; font-weight:500; border-radius:4px; border:1px solid transparent; cursor:pointer; transition:background 150ms; white-space:nowrap; color:var(--cv-text); }
+    .ebtn svg { width:13px; height:13px; }
+    .ebtn-secondary { background:var(--cv-toolbar); border-color:var(--cv-border); }
+    .ebtn-secondary:hover { background:var(--cv-hover); }
+    .ebtn-approve { background:rgba(39,174,96,0.15); border-color:rgba(39,174,96,0.3); color:#5dd68a; }
+    .ebtn-approve:hover { background:rgba(39,174,96,0.25); }
+    .ebtn-reject { background:rgba(231,76,60,0.12); border-color:rgba(231,76,60,0.28); color:#f87171; }
+    .ebtn-reject:hover { background:rgba(231,76,60,0.22); }
+
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--cv-border); border-radius:2px; }
   </style>
 </head>
 <body>
-<div class="editor-shell">
 
-  <!-- Topbar -->
-  <header class="editor-topbar">
-    <div class="editor-topbar__left">
-      <a href="projects.html" class="editor-logo">
-        <img src="../components/logo.svg" alt="ASI" style="height:24px;width:auto;flex-shrink:0;">
-        <span class="editor-logo__name" style="color:rgba(255,255,255,0.7);letter-spacing:.04em;">CV Label</span>
-      </a>
-      <div class="topbar-sep"></div>
-      <nav class="editor-breadcrumb">
-        <a href="projects.html">Dự án</a>
-        <span class="editor-breadcrumb-sep">›</span>
-        <a href="project-detail.html">License Plate v2</a>
-        <span class="editor-breadcrumb-sep">›</span>
-        <a href="project-detail.html" style="display:inline-flex;align-items:center;gap:3px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          batch_01
-        </a>
-        <span class="editor-breadcrumb-sep">›</span>
-        <span class="editor-breadcrumb-current">Review · img_0042.jpg</span>
-      </nav>
-    </div>
-    <div class="editor-topbar__right">
-      <span style="font-size:11px;color:var(--editor-muted);">Batch: 12/24 ảnh</span>
-      <div class="topbar-sep"></div>
-      <button class="ebtn ebtn-secondary" onclick="showToast('Ảnh trước')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        Trước
-      </button>
-      <button class="ebtn ebtn-secondary" onclick="showToast('Ảnh tiếp theo')">
-        Tiếp
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-  </header>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar-placeholder"></aside>
 
-  <div class="editor-body">
-
-    <!-- Left Panel -->
-    <aside class="panel-left">
-      <div class="panel-section-header"><span>Batch review</span><span style="color:var(--editor-text);">24</span></div>
-      <div class="img-list">
-        <div class="img-list-item">
-          <div class="img-thumb" style="background:linear-gradient(135deg,#2a3a28,#1e2832);">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          </div>
-          <div style="flex:1;min-width:0;">
-            <div class="img-list-item__name">img_0038.jpg</div>
-            <div style="margin-top:2px;"><span class="status-dot approved">Đã duyệt</span></div>
-          </div>
-        </div>
-        <div class="img-list-item">
-          <div class="img-thumb" style="background:linear-gradient(135deg,#3a2a1e,#2a1e18);">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          </div>
-          <div style="flex:1;min-width:0;">
-            <div class="img-list-item__name">img_0039.jpg</div>
-            <div style="margin-top:2px;"><span class="status-dot rejected">Trả lại</span></div>
-          </div>
-        </div>
-        <div class="img-list-item active">
-          <div class="img-thumb" style="background:linear-gradient(135deg,#1a2028,#243040);border:1px solid var(--editor-accent);">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00EAFF" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          </div>
-          <div style="flex:1;min-width:0;">
-            <div class="img-list-item__name" style="color:var(--editor-accent);">img_0042.jpg</div>
-            <div style="margin-top:2px;"><span class="status-dot pending">Chờ duyệt</span></div>
-          </div>
-        </div>
-        <div class="img-list-item">
-          <div class="img-thumb"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-          <div style="flex:1;min-width:0;">
-            <div class="img-list-item__name">img_0043.jpg</div>
-            <div style="margin-top:2px;"><span class="status-dot pending">Chờ duyệt</span></div>
-          </div>
-        </div>
-        <div class="img-list-item">
-          <div class="img-thumb"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
-          <div style="flex:1;min-width:0;">
-            <div class="img-list-item__name">img_0044.jpg</div>
-            <div style="margin-top:2px;"><span class="status-dot pending">Chờ duyệt</span></div>
-          </div>
-        </div>
+  <div class="main-area">
+    <!-- Light topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <nav class="breadcrumb">
+          <a href="projects.html">Dự án</a>
+          <span class="breadcrumb-sep">›</span>
+          <a href="project-detail.html">License Plate v2</a>
+          <span class="breadcrumb-sep">›</span>
+          <a href="project-detail.html" style="display:inline-flex;align-items:center;gap:3px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            batch_01
+          </a>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-current">Review · img_0042.jpg</span>
+        </nav>
       </div>
-      <div class="panel-nav">
-        <button class="ebtn ebtn-secondary">
+      <div class="topbar-right">
+        <span class="batch-count">12 / 24 ảnh</span>
+        <button class="btn btn-secondary btn-sm" onclick="showToast('Ảnh trước')">
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           Trước
         </button>
-        <button class="ebtn ebtn-secondary">
+        <button class="btn btn-secondary btn-sm" onclick="showToast('Ảnh tiếp theo')">
           Tiếp
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
-    </aside>
+    </header>
 
-    <!-- Canvas -->
-    <div class="canvas-area">
-      <div class="canvas-viewport">
-        <div class="read-only-banner">
-          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Chế độ xem — không thể chỉnh sửa
-        </div>
-        <div style="position:relative;">
-          <div class="mock-image">
-            <div class="bbox" style="left:120px;top:180px;width:200px;height:60px;border-color:#e53e3e;background:rgba(229,62,62,0.08);">
-              <div class="bbox-label" style="background:#e53e3e;">license_plate</div>
+    <!-- Canvas review (dark) -->
+    <div class="editor-body">
+
+      <!-- Left Panel -->
+      <aside class="panel-left">
+        <div class="panel-section-header"><span>Batch review</span><span style="color:var(--cv-text);">24</span></div>
+        <div class="img-list">
+          <div class="img-list-item">
+            <div class="img-thumb" style="background:linear-gradient(135deg,#2a3a28,#1e2832);">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </div>
-            <div class="bbox" style="left:60px;top:100px;width:320px;height:260px;border-color:#3182ce;background:rgba(49,130,206,0.05);">
-              <div class="bbox-label" style="background:#3182ce;">vehicle</div>
+            <div style="flex:1;min-width:0;">
+              <div class="img-list-item__name">img_0038.jpg</div>
+              <div style="margin-top:2px;"><span class="status-dot approved">Đã duyệt</span></div>
             </div>
-            <svg class="polygon-overlay" viewBox="0 0 640 480">
-              <polygon points="280,150 340,140 360,160 350,190 290,185" fill="rgba(56,161,105,0.15)" stroke="#38a169" stroke-width="1.5"/>
-            </svg>
-            <div class="mock-image-label">img_0042.jpg · Annotator: Trần Bình</div>
+          </div>
+          <div class="img-list-item">
+            <div class="img-thumb" style="background:linear-gradient(135deg,#3a2a1e,#2a1e18);">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div class="img-list-item__name">img_0039.jpg</div>
+              <div style="margin-top:2px;"><span class="status-dot rejected">Trả lại</span></div>
+            </div>
+          </div>
+          <div class="img-list-item active">
+            <div class="img-thumb" style="background:linear-gradient(135deg,#1a2028,#243040);border:1px solid var(--cv-accent);">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div class="img-list-item__name" style="color:var(--cv-accent);">img_0042.jpg</div>
+              <div style="margin-top:2px;"><span class="status-dot pending">Chờ duyệt</span></div>
+            </div>
+          </div>
+          <div class="img-list-item">
+            <div class="img-thumb"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+            <div style="flex:1;min-width:0;">
+              <div class="img-list-item__name">img_0043.jpg</div>
+              <div style="margin-top:2px;"><span class="status-dot pending">Chờ duyệt</span></div>
+            </div>
+          </div>
+          <div class="img-list-item">
+            <div class="img-thumb"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+            <div style="flex:1;min-width:0;">
+              <div class="img-list-item__name">img_0044.jpg</div>
+              <div style="margin-top:2px;"><span class="status-dot pending">Chờ duyệt</span></div>
+            </div>
           </div>
         </div>
+        <div class="panel-nav">
+          <button class="ebtn ebtn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Trước
+          </button>
+          <button class="ebtn ebtn-secondary">
+            Tiếp
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Canvas -->
+      <div class="canvas-area">
+        <div class="canvas-viewport">
+          <div class="read-only-banner">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;vertical-align:middle;margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Chế độ xem — không thể chỉnh sửa
+          </div>
+          <div style="position:relative;">
+            <div class="mock-image">
+              <div class="bbox" style="left:120px;top:180px;width:200px;height:60px;border-color:#e53e3e;background:rgba(229,62,62,0.08);">
+                <div class="bbox-label" style="background:#e53e3e;">license_plate</div>
+              </div>
+              <div class="bbox" style="left:60px;top:100px;width:320px;height:260px;border-color:#3182ce;background:rgba(49,130,206,0.05);">
+                <div class="bbox-label" style="background:#3182ce;">vehicle</div>
+              </div>
+              <svg class="polygon-overlay" viewBox="0 0 640 480">
+                <polygon points="280,150 340,140 360,160 350,190 290,185" fill="rgba(56,161,105,0.15)" stroke="#38a169" stroke-width="1.5"/>
+              </svg>
+              <div class="mock-image-label">img_0042.jpg · Annotator: Trần Bình</div>
+            </div>
+          </div>
+        </div>
+        <div class="statusbar">
+          <span>3 annotations · 2 bbox, 1 polygon</span>
+          <div class="statusbar-sep"></div>
+          <span>Read-only</span>
+          <div style="margin-left:auto;">Annotator: <strong style="color:var(--cv-text);">Trần Bình</strong> · Nộp lúc 14:25</div>
+        </div>
       </div>
-      <div class="statusbar">
-        <span>3 annotations · 2 bbox, 1 polygon</span>
-        <div class="statusbar-sep"></div>
-        <span>Read-only mode</span>
-        <div style="margin-left:auto;">Annotator: <strong style="color:var(--editor-text);">Trần Bình</strong> · Nộp lúc 14:25</div>
-      </div>
+
+      <!-- Right Panel — Review form -->
+      <aside class="panel-right">
+        <div class="panel-section-header">Kiểm tra annotation</div>
+
+        <div class="panel-scroll">
+          <div style="margin-bottom:12px;">
+            <div class="review-label">Tóm tắt</div>
+            <div class="annotation-summary">
+              <div class="annotation-summary-row"><span>Annotations:</span><strong>3</strong></div>
+              <div class="annotation-summary-row"><span>Classes:</span><strong>3 / 3</strong></div>
+              <div class="annotation-summary-row"><span>Thời gian làm:</span><strong>~8 phút</strong></div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <div class="review-label">Tiêu chí kiểm tra</div>
+            <div style="display:flex;flex-direction:column;">
+              <label class="checklist-item">
+                <input type="checkbox" checked>
+                <span>Bbox bao phủ đủ vùng đối tượng</span>
+              </label>
+              <label class="checklist-item">
+                <input type="checkbox" checked>
+                <span>Label đúng class</span>
+              </label>
+              <label class="checklist-item">
+                <input type="checkbox" checked>
+                <span>Không bỏ sót đối tượng</span>
+              </label>
+              <label class="checklist-item">
+                <input type="checkbox">
+                <span>Polygon đủ chi tiết</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <div class="review-label">Ghi chú <span style="font-size:10px;font-weight:400;">(bắt buộc khi Trả lại)</span></div>
+            <textarea class="review-textarea" id="reviewNote" placeholder="Nhập ghi chú cho annotator..."></textarea>
+          </div>
+        </div>
+
+        <div class="panel-actions">
+          <button class="ebtn ebtn-approve" style="justify-content:center;" onclick="handleApprove()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Duyệt
+          </button>
+          <button class="ebtn ebtn-reject" style="justify-content:center;" onclick="handleReject()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.87"/></svg>
+            Trả lại
+          </button>
+          <div style="text-align:center;font-size:11px;color:var(--cv-muted);">12 / 24 đã review trong batch</div>
+        </div>
+      </aside>
+
     </div>
-
-    <!-- Right Panel — Review form -->
-    <aside class="panel-right">
-      <div class="panel-section-header">Kiểm tra annotation</div>
-
-      <div class="panel-scroll">
-        <!-- Annotation summary -->
-        <div style="margin-bottom:12px;">
-          <div class="review-label">Tóm tắt</div>
-          <div class="annotation-summary">
-            <div class="annotation-summary-row"><span>Annotations:</span><strong>3</strong></div>
-            <div class="annotation-summary-row"><span>Classes:</span><strong>3 / 3</strong></div>
-            <div class="annotation-summary-row"><span>Thời gian làm:</span><strong>~8 phút</strong></div>
-          </div>
-        </div>
-
-        <!-- Checklist -->
-        <div style="margin-bottom:16px;">
-          <div class="review-label">Tiêu chí kiểm tra</div>
-          <div style="display:flex;flex-direction:column;">
-            <label class="checklist-item">
-              <input type="checkbox" checked>
-              <span>Bbox bao phủ đủ vùng đối tượng</span>
-            </label>
-            <label class="checklist-item">
-              <input type="checkbox" checked>
-              <span>Label đúng class</span>
-            </label>
-            <label class="checklist-item">
-              <input type="checkbox" checked>
-              <span>Không bỏ sót đối tượng</span>
-            </label>
-            <label class="checklist-item">
-              <input type="checkbox">
-              <span>Polygon đủ chi tiết</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Notes -->
-        <div>
-          <div class="review-label">Ghi chú <span style="font-size:10px;font-weight:400;">(bắt buộc khi Trả lại)</span></div>
-          <textarea class="review-textarea" id="reviewNote" placeholder="Nhập ghi chú cho annotator..."></textarea>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="panel-actions">
-        <button class="ebtn ebtn-approve" style="justify-content:center;" onclick="handleApprove()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          Duyệt
-        </button>
-        <button class="ebtn ebtn-reject" style="justify-content:center;" onclick="handleReject()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.87"/></svg>
-          Trả lại
-        </button>
-        <div style="text-align:center;font-size:11px;color:var(--editor-muted);">12 / 24 đã review trong batch</div>
-      </div>
-    </aside>
-
   </div>
 </div>
 
@@ -296,14 +314,14 @@
 <script>
   function showToast(msg, color) {
     const el = document.createElement('div');
-    el.style.cssText = `padding:8px 14px;background:${color || '#091525'};border:1px solid rgba(255,255,255,0.09);border-radius:6px;font-size:12px;color:#d8e8f4;pointer-events:all;box-shadow:0 4px 12px rgba(0,0,0,0.6);`;
+    el.style.cssText = `padding:8px 14px;background:${color || '#242424'};border:1px solid rgba(255,255,255,0.12);border-radius:6px;font-size:12px;color:#e8e8e6;pointer-events:all;box-shadow:0 4px 12px rgba(0,0,0,0.6);`;
     el.textContent = msg;
     document.getElementById('toastContainer').appendChild(el);
     setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; setTimeout(() => el.remove(), 300); }, 2500);
   }
 
   function handleApprove() {
-    showToast('✓ Đã duyệt · Chuyển sang ảnh tiếp theo', 'rgba(39,174,96,0.25)');
+    showToast('Đã duyệt · Chuyển sang ảnh tiếp theo', 'rgba(39,174,96,0.25)');
   }
 
   function handleReject() {
@@ -311,13 +329,13 @@
     if (!note) {
       document.getElementById('reviewNote').style.borderColor = '#f87171';
       document.getElementById('reviewNote').focus();
-      showToast('⚠ Vui lòng nhập ghi chú trước khi trả lại', 'rgba(180,60,40,0.25)');
+      showToast('Vui lòng nhập ghi chú trước khi trả lại', 'rgba(180,60,40,0.25)');
       return;
     }
     document.getElementById('reviewNote').style.borderColor = '';
-    showToast('↩ Đã trả lại · Annotator sẽ nhận thông báo', 'rgba(180,60,40,0.25)');
+    showToast('Đã trả lại · Annotator sẽ nhận thông báo', 'rgba(180,60,40,0.25)');
   }
 </script>
-  <script src="../components/sidebar.js"></script>
+<script src="../components/sidebar.js"></script>
 </body>
 </html>

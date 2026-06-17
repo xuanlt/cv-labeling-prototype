@@ -5,78 +5,89 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CVLabel — Annotation Editor</title>
   <link rel="stylesheet" href="../styles/base.css">
-  <link rel="stylesheet" href="../styles/components.css">
   <style>
-    /* ─── Canvas dark theme tokens ─────────────────────── */
     :root {
-      --cv-bg:        #1c1c1e;
-      --cv-surface:   #242424;
-      --cv-toolbar:   #2a2a2a;
-      --cv-border:    #3a3a3a;
-      --cv-text:      #e8e8e6;
-      --cv-muted:     #8a8a88;
-      --cv-hover:     rgba(255,255,255,0.06);
-      --cv-active:    rgba(55,138,221,0.12);
-      --cv-accent:    #378ADD;
-      --cv-panel-w:   240px;
-      --cv-panel-rw:  260px;
-      --cv-toolbar-h: 44px;
+      --editor-bg:       #060d18;
+      --editor-surface:  #091525;
+      --editor-toolbar:  #0c1c32;
+      --editor-border:   rgba(255,255,255,0.08);
+      --editor-text:     #d8e8f4;
+      --editor-muted:    rgba(160,200,235,0.48);
+      --editor-hover:    rgba(255,255,255,0.06);
+      --editor-active:   rgba(255,255,255,0.10);
+      --editor-accent:   #00EAFF;
+      --editor-panel-w:  240px;
+      --editor-right-w:  260px;
+      --editor-topbar-h: 48px;
+      --editor-toolbar-h: 44px;
     }
 
-    /* ─── App shell & sidebar ───────────────────────────── */
-    .app-shell { display:flex; height:100vh; overflow:hidden; }
-    .sidebar { width:var(--sidebar-width); height:100vh; background:var(--sidebar-bg); border-right:1px solid var(--sidebar-border); display:flex; flex-direction:column; flex-shrink:0; }
-    .sidebar-logo { display:flex; align-items:center; gap:10px; padding:var(--space-4); height:var(--topbar-height); border-bottom:1px solid var(--sidebar-border); }
-    .sidebar-logo__text { font-size:13px; font-weight:700; color:rgba(255,255,255,0.75); letter-spacing:.06em; }
-    .sidebar-nav { flex:1; overflow-y:auto; padding:var(--space-3) 0; }
-    .nav-item { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-2) var(--space-4); font-size:var(--text-sm); font-weight:500; color:var(--sidebar-text-muted); text-decoration:none; transition:all var(--transition); }
-    .nav-item svg { width:18px; height:18px; flex-shrink:0; }
-    .nav-item:hover { background:var(--sidebar-hover-bg); color:var(--sidebar-text); text-decoration:none; }
-    .nav-item.active { background:var(--sidebar-active-bg); color:var(--sidebar-active-color); }
-    .nav-group { margin-bottom:2px; }
-    .nav-group-hd { display:flex; align-items:center; gap:6px; width:100%; padding:5px var(--space-3); background:none; border:none; cursor:pointer; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--sidebar-text-muted); border-radius:var(--radius-sm); text-align:left; transition:background var(--transition),color var(--transition); }
-    .nav-group-hd:hover { background:var(--sidebar-hover-bg); color:var(--sidebar-text); }
-    .nav-group-chevron { margin-left:auto; transition:transform .15s; flex-shrink:0; }
-    .nav-group-hd.collapsed .nav-group-chevron { transform:rotate(-90deg); }
-    .nav-group-bd { padding-bottom:var(--space-2); }
-    .nav-group-bd.hidden { display:none; }
-    .sidebar-footer { padding:var(--space-4); border-top:1px solid var(--sidebar-border); }
-    .user-row { display:flex; align-items:center; gap:var(--space-3); }
-    .user-row__name { font-size:var(--text-sm); font-weight:500; color:var(--sidebar-text); }
-    .user-row__role { font-size:var(--text-xs); color:var(--sidebar-text-muted); }
-    .avatar { display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; font-size:11px; font-weight:600; color:white; flex-shrink:0; }
-    .avatar-sm { width:26px; height:26px; font-size:10px; }
-    .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ─── Light topbar ──────────────────────────────────── */
-    .topbar { height:var(--topbar-height); background:var(--color-surface); border-bottom:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; padding:0 var(--space-6); flex-shrink:0; gap:var(--space-3); }
-    .topbar-left { display:flex; align-items:center; gap:var(--space-3); min-width:0; overflow:hidden; }
-    .topbar-right { display:flex; align-items:center; gap:var(--space-2); flex-shrink:0; }
-    .breadcrumb { display:flex; align-items:center; gap:var(--space-2); font-size:var(--text-sm); overflow:hidden; }
-    .breadcrumb a { color:var(--color-text-muted); text-decoration:none; transition:color var(--transition); white-space:nowrap; }
-    .breadcrumb a:hover { color:var(--color-text); text-decoration:none; }
-    .breadcrumb-sep { color:var(--color-border); font-size:10px; }
-    .breadcrumb-current { color:var(--color-text); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
-    .autosave-info { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--color-text-muted); padding-right:var(--space-3); margin-right:var(--space-1); border-right:1px solid var(--color-border); }
-    .autosave-dot { width:6px; height:6px; border-radius:50%; background:var(--color-text-muted); flex-shrink:0; }
-    .autosave-dot.saved { background:var(--color-approved); }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: 13px;
+      background: var(--editor-bg);
+      color: var(--editor-text);
+      -webkit-font-smoothing: antialiased;
+    }
 
-    /* ─── Editor body (dark canvas) ─────────────────────── */
-    .editor-body { display:flex; flex:1; overflow:hidden; min-height:0; font-size:13px; color:var(--cv-text); font-family:'Plus Jakarta Sans',system-ui,sans-serif; }
-
+    a { color: var(--editor-accent); text-decoration: none; }
+    button { cursor: pointer; font-family: inherit; font-size: inherit; }
     svg { display: block; }
+
+    .editor-shell { display: flex; flex-direction: column; height: 100vh; }
+
+    /* Topbar */
+    .editor-topbar {
+      height: var(--editor-topbar-h);
+      background: var(--editor-surface);
+      border-bottom: 1px solid var(--editor-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px; flex-shrink: 0; gap: 12px;
+    }
+    .editor-topbar__left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .editor-logo { display: flex; align-items: center; gap: 6px; color: var(--editor-text); text-decoration: none; flex-shrink: 0; }
+    .editor-logo__name { font-weight: 600; font-size: 13px; }
+    .topbar-sep { width: 1px; height: 20px; background: var(--editor-border); flex-shrink: 0; }
+    .editor-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 0; }
+    .editor-breadcrumb a { color: var(--editor-muted); }
+    .editor-breadcrumb a:hover { color: var(--editor-text); }
+    .editor-breadcrumb-sep { color: var(--editor-border); font-size: 10px; }
+    .editor-breadcrumb-current { color: var(--editor-text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+    .editor-topbar__right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .autosave-indicator { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--editor-muted); padding: 4px 8px; }
+    .autosave-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--editor-muted); }
+    .autosave-dot.saved { background: #4caf50; }
+
+    .ebtn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; font-size: 12px; font-weight: 500;
+      border-radius: 4px; border: 1px solid transparent; cursor: pointer;
+      transition: background 150ms, border-color 150ms; white-space: nowrap; color: var(--editor-text);
+    }
+    .ebtn-secondary { background: var(--editor-toolbar); border-color: var(--editor-border); }
+    .ebtn-secondary:hover { background: var(--editor-hover); }
+    .ebtn-primary { background: var(--editor-accent); border-color: var(--editor-accent); color: #0a1e33; }
+    .ebtn-primary:hover { background: #00c8e0; }
+    .ebtn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+    /* Body */
+    .editor-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
 
     /* Left Panel */
     .panel-left {
-      width: var(--cv-panel-w);
-      background: var(--cv-surface);
-      border-right: 1px solid var(--cv-border);
+      width: var(--editor-panel-w);
+      background: var(--editor-surface);
+      border-right: 1px solid var(--editor-border);
       display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
     }
     .panel-section-header {
       padding: 10px 12px 8px; font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .08em; color: var(--cv-muted);
-      border-bottom: 1px solid var(--cv-border);
+      text-transform: uppercase; letter-spacing: .08em; color: var(--editor-muted);
+      border-bottom: 1px solid var(--editor-border);
       display: flex; align-items: center; justify-content: space-between;
     }
     .img-list { flex: 1; overflow-y: auto; padding: 4px 0; }
@@ -84,57 +95,59 @@
       display: flex; align-items: center; gap: 8px; padding: 6px 12px;
       cursor: pointer; transition: background 150ms; border-left: 2px solid transparent;
     }
-    .img-list-item:hover { background: var(--cv-hover); }
-    .img-list-item.active { background: rgba(55,138,221,0.10); border-left-color: var(--cv-accent); }
+    .img-list-item:hover { background: var(--editor-hover); }
+    .img-list-item.active { background: rgba(0,234,255,0.10); border-left-color: var(--editor-accent); }
     .img-thumb {
-      width: 44px; height: 33px; border-radius: 3px; background: var(--cv-toolbar);
+      width: 44px; height: 33px; border-radius: 3px; background: var(--editor-toolbar);
       display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;
     }
-    .img-thumb svg { width: 18px; height: 18px; color: var(--cv-muted); }
+    .img-thumb svg { width: 18px; height: 18px; color: var(--editor-muted); }
     .img-list-item__info { flex: 1; min-width: 0; }
     .img-list-item__name { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .img-list-item__badge { margin-top: 2px; }
     .status-dot { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; }
     .status-dot::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
     .status-dot.done     { color: #4caf50; }
-    .status-dot.active   { color: var(--cv-accent); }
-    .status-dot.none     { color: var(--cv-muted); }
+    .status-dot.active   { color: var(--editor-accent); }
+    .status-dot.none     { color: var(--editor-muted); }
     .status-dot.returned { color: #f87171; }
 
-    .img-filter { display:flex; gap:3px; padding:6px 8px; border-bottom:1px solid var(--cv-border); flex-shrink:0; }
-    .img-filter-btn { flex:1; padding:3px 0; font-size:10px; font-weight:600; letter-spacing:.03em; background:none; border:1px solid transparent; border-radius:3px; color:var(--cv-muted); cursor:pointer; transition:all 120ms; }
-    .img-filter-btn:hover { color:var(--cv-text); background:var(--cv-hover); }
-    .img-filter-btn.active { background:var(--cv-active); color:var(--cv-text); border-color:var(--cv-border); }
+    .img-filter { display:flex; gap:3px; padding:6px 8px; border-bottom:1px solid var(--editor-border); flex-shrink:0; }
+    .img-filter-btn { flex:1; padding:3px 0; font-size:10px; font-weight:600; letter-spacing:.03em; background:none; border:1px solid transparent; border-radius:3px; color:var(--editor-muted); cursor:pointer; transition:all 120ms; }
+    .img-filter-btn:hover { color:var(--editor-text); background:var(--editor-hover); }
+    .img-filter-btn.active { background:var(--editor-active); color:var(--editor-text); border-color:var(--editor-border); }
 
-    .panel-nav { display: flex; border-top: 1px solid var(--cv-border); padding: 8px 12px; gap: 6px; flex-shrink: 0; }
+    .panel-nav { display: flex; border-top: 1px solid var(--editor-border); padding: 8px 12px; gap: 6px; flex-shrink: 0; }
     .panel-nav .ebtn { flex: 1; justify-content: center; }
 
     /* Canvas */
-    .canvas-area { flex: 1; display: flex; flex-direction: column; background: var(--cv-bg); overflow: hidden; min-width: 0; }
+    .canvas-area { flex: 1; display: flex; flex-direction: column; background: var(--editor-bg); overflow: hidden; min-width: 0; }
     .editor-toolbar {
-      height: var(--cv-toolbar-h); background: var(--cv-toolbar);
-      border-bottom: 1px solid var(--cv-border);
+      height: var(--editor-toolbar-h); background: var(--editor-toolbar);
+      border-bottom: 1px solid var(--editor-border);
       display: flex; align-items: center; gap: 2px; padding: 0 12px; flex-shrink: 0;
     }
     .tool-btn {
       width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
       border-radius: 4px; background: none; border: 1px solid transparent;
-      color: var(--cv-muted); cursor: pointer; position: relative; transition: all 150ms;
+      color: var(--editor-muted); cursor: pointer; position: relative; transition: all 150ms;
     }
-    .tool-btn:hover { background: var(--cv-hover); color: var(--cv-text); }
-    .tool-btn.active { background: var(--cv-active); border-color: var(--cv-border); color: var(--cv-text); }
+    .tool-btn:hover { background: var(--editor-hover); color: var(--editor-text); }
+    .tool-btn.active { background: var(--editor-active); border-color: var(--editor-border); color: var(--editor-text); }
     .tool-btn svg { width: 16px; height: 16px; }
-    .tool-shortcut { position: absolute; bottom: 3px; right: 3px; font-size: 8px; font-weight: 700; color: var(--cv-muted); line-height: 1; }
-    .tool-sep { width: 1px; height: 22px; background: var(--cv-border); margin: 0 4px; }
+    .tool-shortcut { position: absolute; bottom: 3px; right: 3px; font-size: 8px; font-weight: 700; color: var(--editor-muted); line-height: 1; }
+    .tool-sep { width: 1px; height: 22px; background: var(--editor-border); margin: 0 4px; }
     .toolbar-right { margin-left: auto; display: flex; align-items: center; gap: 4px; }
 
-    .canvas-viewport { flex: 1; overflow: hidden; position: relative; padding: 3%; }
+    .canvas-viewport {
+      flex: 1; overflow: hidden; position: relative; padding: 3%;
+    }
     .canvas-container { position: relative; user-select: none; width: 100%; transform-origin: 0 0; }
 
     .mock-image {
       width: 100%; aspect-ratio: 640 / 480;
-      background: linear-gradient(135deg,#141416 0%,#1a1e20 20%,#131618 40%,#181e14 60%,#141620 80%,#0e1010 100%);
-      border: 1px solid var(--cv-border);
+      background: linear-gradient(135deg,#0a1520 0%,#0f1e2e 20%,#08141e 40%,#0d1e14 60%,#0a1220 80%,#04080e 100%);
+      border: 1px solid var(--editor-border);
       position: relative; overflow: hidden;
     }
     .mock-image-label { position: absolute; bottom: 12px; left: 12px; font-size: 11px; color: rgba(255,255,255,0.35); font-family: monospace; pointer-events: none; }
@@ -142,65 +155,52 @@
     #annSvg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; cursor: crosshair; }
 
     .statusbar {
-      height: 26px; background: var(--cv-surface); border-top: 1px solid var(--cv-border);
+      height: 26px; background: var(--editor-surface); border-top: 1px solid var(--editor-border);
       display: flex; align-items: center; gap: 16px; padding: 0 12px; flex-shrink: 0;
-      font-size: 11px; color: var(--cv-muted);
+      font-size: 11px; color: var(--editor-muted);
     }
     .statusbar-item { display: flex; align-items: center; gap: 4px; }
-    .statusbar-sep { width: 1px; height: 12px; background: var(--cv-border); }
+    .statusbar-sep { width: 1px; height: 12px; background: var(--editor-border); }
 
     /* Right Panel */
     .panel-right {
-      width: var(--cv-panel-rw); background: var(--cv-surface);
-      border-left: 1px solid var(--cv-border);
+      width: var(--editor-right-w); background: var(--editor-surface);
+      border-left: 1px solid var(--editor-border);
       display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
     }
     .panel-scroll { flex: 1; overflow-y: auto; }
 
     .class-item { display: flex; align-items: center; gap: 8px; padding: 7px 12px; cursor: pointer; transition: background 150ms; }
-    .class-item:hover { background: var(--cv-hover); }
-    .class-item.active { background: rgba(55,138,221,0.10); }
+    .class-item:hover { background: var(--editor-hover); }
+    .class-item.active { background: rgba(0,234,255,0.10); }
     .class-color { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
     .class-name { flex: 1; font-size: 12px; }
-    .class-key { font-size: 10px; font-weight: 700; padding: 1px 5px; background: var(--cv-toolbar); border: 1px solid var(--cv-border); border-radius: 3px; color: var(--cv-muted); font-family: monospace; }
+    .class-key { font-size: 10px; font-weight: 700; padding: 1px 5px; background: var(--editor-toolbar); border: 1px solid var(--editor-border); border-radius: 3px; color: var(--editor-muted); font-family: monospace; }
 
     .annotation-item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; cursor: pointer; transition: background 150ms; }
-    .annotation-item:hover { background: var(--cv-hover); }
-    .annotation-item.active { background: rgba(55,138,221,0.10); }
+    .annotation-item:hover { background: var(--editor-hover); }
+    .annotation-item.active { background: rgba(0,234,255,0.10); }
     .annotation-icon { width: 14px; height: 14px; flex-shrink: 0; }
     .annotation-name { flex: 1; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .annotation-del { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 3px; background: none; border: none; color: var(--cv-muted); cursor: pointer; opacity: 0; transition: opacity 150ms, background 150ms; }
+    .annotation-del { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 3px; background: none; border: none; color: var(--editor-muted); cursor: pointer; opacity: 0; transition: opacity 150ms, background 150ms; }
     .annotation-item:hover .annotation-del { opacity: 1; }
-    .annotation-del:hover { background: var(--cv-hover); color: #f87171; }
+    .annotation-del:hover { background: var(--editor-hover); color: #f87171; }
 
-    .ann-edit-panel { padding: 10px 12px; background: rgba(55,138,221,0.04); border-bottom: 1px solid var(--cv-border); }
-    .ann-edit-panel__title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--cv-accent); margin-bottom: 8px; display:flex; align-items:center; justify-content:space-between; }
-    .ann-edit-class-btn { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:3px; border:1px solid var(--cv-border); background:var(--cv-toolbar); cursor:pointer; font-size:11px; color:var(--cv-text); transition:all 120ms; font-family:inherit; white-space:nowrap; }
-    .ann-edit-class-btn:hover { border-color:rgba(255,255,255,0.2); background:var(--cv-hover); }
-    .ann-edit-class-btn.selected-class { border-color:var(--cv-accent); background:rgba(55,138,221,0.10); color:var(--cv-accent); }
+    .ann-edit-panel { padding: 10px 12px; background: rgba(0,234,255,0.04); border-bottom: 1px solid var(--editor-border); }
+    .ann-edit-panel__title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--editor-accent); margin-bottom: 8px; display:flex; align-items:center; justify-content:space-between; }
+    .ann-edit-class-btn { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:3px; border:1px solid var(--editor-border); background:var(--editor-toolbar); cursor:pointer; font-size:11px; color:var(--editor-text); transition:all 120ms; font-family:inherit; white-space:nowrap; }
+    .ann-edit-class-btn:hover { border-color:rgba(255,255,255,0.2); background:var(--editor-hover); }
+    .ann-edit-class-btn.selected-class { border-color:var(--editor-accent); background:rgba(0,234,255,0.10); color:var(--editor-accent); }
 
-    .ctx-menu { position:fixed; background:#242424; border:1px solid rgba(255,255,255,0.12); border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.7); z-index:900; min-width:172px; padding:4px 0; }
-    .ctx-menu-item { display:flex; align-items:center; gap:9px; padding:7px 14px; font-size:12px; cursor:pointer; transition:background 100ms; color:var(--cv-text); background:none; border:none; width:100%; text-align:left; font-family:inherit; }
-    .ctx-menu-item:hover { background:var(--cv-hover); }
+    .ctx-menu { position:fixed; background:#0c1c32; border:1px solid rgba(255,255,255,0.12); border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,0.7); z-index:900; min-width:172px; padding:4px 0; }
+    .ctx-menu-item { display:flex; align-items:center; gap:9px; padding:7px 14px; font-size:12px; cursor:pointer; transition:background 100ms; color:var(--editor-text); background:none; border:none; width:100%; text-align:left; font-family:inherit; }
+    .ctx-menu-item:hover { background:var(--editor-hover); }
     .ctx-menu-item.ctx-danger { color:#f87171; }
     .ctx-menu-item.ctx-danger:hover { background:rgba(248,113,113,0.10); }
-    .ctx-menu-sep { height:1px; background:var(--cv-border); margin:4px 0; }
+    .ctx-menu-sep { height:1px; background:var(--editor-border); margin:4px 0; }
 
-    .panel-actions { padding: 12px; border-top: 1px solid var(--cv-border); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+    .panel-actions { padding: 12px; border-top: 1px solid var(--editor-border); display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
     .autosave-status { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #4caf50; }
-
-    /* Canvas buttons (dark panel context) */
-    .ebtn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 5px 12px; font-size: 12px; font-weight: 500;
-      border-radius: 4px; border: 1px solid transparent; cursor: pointer;
-      transition: background 150ms, border-color 150ms; white-space: nowrap; color: var(--cv-text);
-    }
-    .ebtn-secondary { background: var(--cv-toolbar); border-color: var(--cv-border); }
-    .ebtn-secondary:hover { background: var(--cv-hover); }
-    .ebtn-primary { background: var(--cv-accent); border-color: var(--cv-accent); color: #fff; }
-    .ebtn-primary:hover { background: #2b7dcc; }
-    .ebtn svg { width: 13px; height: 13px; flex-shrink: 0; }
 
     [data-tooltip] { position: relative; }
     [data-tooltip]:hover::after {
@@ -210,49 +210,52 @@
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--cv-border); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: var(--editor-border); border-radius: 2px; }
   </style>
 </head>
 <body>
 
-<div class="app-shell">
-  <aside class="sidebar" id="sidebar-placeholder"></aside>
+<div class="editor-shell">
 
-  <div class="main-area">
-    <!-- Light topbar -->
-    <header class="topbar">
-      <div class="topbar-left">
-        <nav class="breadcrumb">
-          <a href="projects.html">Dự án</a>
-          <span class="breadcrumb-sep">›</span>
-          <a href="project-detail.html">License Plate v2</a>
-          <span class="breadcrumb-sep">›</span>
-          <a href="project-detail.html" style="display:inline-flex;align-items:center;gap:3px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-            batch_01
-          </a>
-          <span class="breadcrumb-sep">›</span>
-          <span class="breadcrumb-current" id="breadcrumbFile">img_0042.jpg</span>
-        </nav>
+  <!-- Topbar -->
+  <header class="editor-topbar">
+    <div class="editor-topbar__left">
+      <a href="projects.html" class="editor-logo">
+        <img src="../components/logo.svg" alt="ASI" style="height:24px;width:auto;flex-shrink:0;">
+        <span class="editor-logo__name" style="color:rgba(255,255,255,0.7);letter-spacing:.04em;">CV Label</span>
+      </a>
+      <div class="topbar-sep"></div>
+      <nav class="editor-breadcrumb">
+        <a href="projects.html">Dự án</a>
+        <span class="editor-breadcrumb-sep">›</span>
+        <a href="project-detail.html">License Plate v2</a>
+        <span class="editor-breadcrumb-sep">›</span>
+        <a href="project-detail.html" style="display:inline-flex;align-items:center;gap:3px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          batch_01
+        </a>
+        <span class="editor-breadcrumb-sep">›</span>
+        <span class="editor-breadcrumb-current" id="breadcrumbFile">img_0042.jpg</span>
+      </nav>
+    </div>
+    <div class="editor-topbar__right">
+      <div class="autosave-indicator">
+        <div class="autosave-dot saved"></div>
+        <span id="autosaveLabel">Đã tự lưu lúc 14:32</span>
       </div>
-      <div class="topbar-right">
-        <div class="autosave-info">
-          <div class="autosave-dot saved"></div>
-          <span id="autosaveLabel">Đã tự lưu lúc 14:32</span>
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick="doSave()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          Lưu nháp
-        </button>
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('submitModal').style.display='flex'">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          Nộp để duyệt
-        </button>
-      </div>
-    </header>
+      <button class="ebtn ebtn-secondary" onclick="doSave()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Lưu nháp
+      </button>
+      <button class="ebtn ebtn-primary" onclick="document.getElementById('submitModal').style.display='flex'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Nộp để duyệt
+      </button>
+    </div>
+  </header>
 
-    <!-- Canvas editor (dark) -->
-    <div class="editor-body">
+  <!-- Body -->
+  <div class="editor-body">
 
     <!-- Left Panel -->
     <aside class="panel-left">
@@ -290,7 +293,7 @@
 
         <div class="img-list-item active" data-img="img_0042.jpg" data-status="active">
           <div class="img-thumb" style="background:linear-gradient(135deg,#1a2028,#243040);border:1px solid var(--editor-accent);">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00EAFF" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           </div>
           <div class="img-list-item__info">
             <div class="img-list-item__name" style="color:var(--editor-accent);">img_0042.jpg</div>
@@ -460,18 +463,18 @@
         </div>
 
         <!-- Add class form -->
-        <div id="addClassForm" style="display:none;padding:8px;border-top:1px solid var(--cv-border);background:var(--cv-bg);">
+        <div id="addClassForm" style="display:none;padding:8px;border-top:1px solid var(--editor-border);background:var(--editor-bg);">
           <div style="display:flex;align-items:center;gap:6px;">
             <div id="newClassColor" style="width:16px;height:16px;border-radius:3px;background:#9b59b6;flex-shrink:0;cursor:pointer;border:1px solid rgba(255,255,255,0.15);" onclick="cycleColor()" title="Đổi màu"></div>
             <input id="newClassName" type="text" maxlength="30" placeholder="tên_class..." autocomplete="off"
-              style="flex:1;background:var(--cv-toolbar);border:1px solid var(--cv-border);border-radius:3px;padding:4px 7px;font-size:11px;color:var(--cv-text);outline:none;font-family:monospace;"
-              onfocus="this.style.borderColor='#378ADD'"
+              style="flex:1;background:var(--editor-toolbar);border:1px solid var(--editor-border);border-radius:3px;padding:4px 7px;font-size:11px;color:var(--editor-text);outline:none;font-family:monospace;"
+              onfocus="this.style.borderColor='#00EAFF'"
               onblur="this.style.borderColor=''"
               onkeydown="handleNewClassKey(event)">
-            <button onclick="confirmAddClass()" title="Thêm" style="background:var(--cv-accent);border:none;border-radius:3px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            <button onclick="confirmAddClass()" title="Thêm" style="background:var(--editor-accent);border:none;border-radius:3px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#060d18" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
-            <button onclick="cancelAddClass()" title="Hủy" style="background:none;border:1px solid var(--cv-border);border-radius:3px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--cv-muted);">
+            <button onclick="cancelAddClass()" title="Hủy" style="background:none;border:1px solid var(--editor-border);border-radius:3px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--editor-muted);">
               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
@@ -506,23 +509,21 @@
       </div>
     </aside>
 
-    </div>
-
   </div>
 </div>
 
 <!-- Submit Modal -->
 <div style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1000;" id="submitModal" onclick="if(event.target===this)this.style.display='none'">
-  <div style="background:var(--cv-surface);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:0;width:420px;box-shadow:0 8px 32px rgba(0,0,0,0.7);">
-    <div style="padding:16px 20px;border-bottom:1px solid var(--cv-border);display:flex;align-items:center;justify-content:space-between;">
+  <div style="background:#091525;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:0;width:420px;box-shadow:0 8px 32px rgba(0,0,0,0.7);">
+    <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;">
       <span style="font-size:14px;font-weight:600;">Nộp để duyệt</span>
-      <button onclick="document.getElementById('submitModal').style.display='none'" style="background:none;border:none;color:var(--cv-muted);cursor:pointer;">
+      <button onclick="document.getElementById('submitModal').style.display='none'" style="background:none;border:none;color:var(--editor-muted);cursor:pointer;">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div style="padding:20px;">
       <p style="font-size:13px;color:var(--editor-muted);margin-bottom:16px;">Bạn đã gắn nhãn xong <strong id="submitImgName" style="color:var(--editor-text);">img_0042.jpg</strong>. Sau khi nộp, ảnh sẽ chuyển sang trạng thái chờ duyệt.</p>
-      <div style="background:var(--cv-bg);border-radius:6px;padding:12px;margin-bottom:16px;font-size:12px;">
+      <div style="background:#060d18;border-radius:6px;padding:12px;margin-bottom:16px;font-size:12px;">
         <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="color:var(--editor-muted);">Annotations:</span><span id="submitAnnSummary">0</span></div>
         <div style="display:flex;justify-content:space-between;"><span style="color:var(--editor-muted);">Classes used:</span><span id="submitClassSummary">—</span></div>
       </div>
@@ -1178,7 +1179,7 @@ function confirmAddClass() {
   item.dataset.cid = newId;
   item.setAttribute('onclick','setClass(this)');
   item.innerHTML = `<div class="class-color" style="background:${color};"></div><span class="class-name">${name}</span>`
-    + `<span style="font-size:9px;padding:1px 4px;background:rgba(255,255,255,0.07);border:1px solid var(--cv-border);border-radius:3px;color:var(--cv-muted);font-family:monospace;">custom</span>`;
+    + `<span style="font-size:9px;padding:1px 4px;background:rgba(255,255,255,0.07);border:1px solid var(--editor-border);border-radius:3px;color:var(--editor-muted);font-family:monospace;">custom</span>`;
   list.appendChild(item);
 
   input.value = '';
@@ -1283,7 +1284,7 @@ document.getElementById('canvasViewport').addEventListener('mouseleave', () => {
 
 function showToast(msg) {
   const el = document.createElement('div');
-  el.style.cssText = 'padding:8px 14px;background:#242424;border:1px solid rgba(255,255,255,0.12);border-radius:6px;font-size:12px;color:#e8e8e6;pointer-events:all;box-shadow:0 4px 12px rgba(0,0,0,0.6);transition:opacity 0.3s;';
+  el.style.cssText = 'padding:8px 14px;background:#091525;border:1px solid rgba(255,255,255,0.09);border-radius:6px;font-size:12px;color:#d8e8f4;pointer-events:all;box-shadow:0 4px 12px rgba(0,0,0,0.6);transition:opacity 0.3s;';
   el.textContent = msg;
   document.getElementById('toastContainer').appendChild(el);
   setTimeout(() => { el.style.opacity='0'; setTimeout(()=>el.remove(), 300); }, 2500);
