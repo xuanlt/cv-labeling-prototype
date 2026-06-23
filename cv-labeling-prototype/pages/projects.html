@@ -6,141 +6,9 @@
   <title>CVLabel — Dự án</title>
   <link rel="stylesheet" href="../styles/base.css">
   <link rel="stylesheet" href="../styles/components.css">
-  <style>
-    .app-shell { display:flex; height:100vh; overflow:hidden; }
-    .sidebar { width:var(--sidebar-width); height:100vh; background:var(--color-surface); border-right:1px solid var(--color-border); display:flex; flex-direction:column; flex-shrink:0; }
-    .sidebar-logo { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-4); height:var(--topbar-height); border-bottom:1px solid var(--color-border); }
-    .sidebar-logo__icon { width:28px; height:28px; background:var(--color-accent); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .sidebar-logo__icon svg { color:white; width:16px; height:16px; }
-    .sidebar-logo__text { font-family:var(--font-heading); font-size:var(--text-lg); font-weight:600; }
-    .sidebar-nav { flex:1; overflow-y:auto; padding:var(--space-3) 0; }
-    .nav-section-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--color-text-muted); padding:var(--space-2) var(--space-4); }
-    .nav-item { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-2) var(--space-4); font-size:var(--text-sm); font-weight:500; color:var(--color-text-muted); cursor:pointer; text-decoration:none; transition:all var(--transition); }
-    .nav-item svg { width:18px; height:18px; flex-shrink:0; }
-    .nav-item:hover { background:var(--color-bg); color:var(--color-text); text-decoration:none; }
-    .nav-item.active { background:var(--color-accent-light); color:var(--color-accent); }
-    .nav-group { margin-bottom:2px; }
-    .nav-group-hd { display:flex; align-items:center; gap:6px; width:100%; padding:5px var(--space-3); background:none; border:none; cursor:pointer; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--color-text-muted); border-radius:var(--radius-sm); text-align:left; transition:background var(--transition),color var(--transition); }
-    .nav-group-hd:hover { background:var(--color-bg); color:var(--color-text); }
-    .nav-group-chevron { margin-left:auto; transition:transform .15s; flex-shrink:0; }
-    .nav-group-hd.collapsed .nav-group-chevron { transform:rotate(-90deg); }
-    .nav-group-bd { padding-bottom:var(--space-2); }
-    .nav-group-bd.hidden { display:none; }
-    .nav-sub { margin:2px 0; }
-    .nav-sub-hd { display:flex; align-items:center; gap:var(--space-3); width:100%; padding:var(--space-2) var(--space-3); background:none; border:none; cursor:pointer; font-size:var(--text-sm); color:var(--color-text); border-radius:var(--radius-sm); text-align:left; transition:background var(--transition),color var(--transition); }
-    .nav-sub-hd:hover { background:var(--color-bg); color:var(--color-text); }
-    .nav-sub-hd svg { width:18px; height:18px; flex-shrink:0; }
-    .nav-sub-chevron { margin-left:auto; transition:transform .15s; flex-shrink:0; }
-    .nav-sub-hd.collapsed .nav-sub-chevron { transform:rotate(-90deg); }
-    .nav-sub-bd { padding-left:var(--space-4); padding-bottom:var(--space-1); }
-    .nav-sub-bd.hidden { display:none; }
-    .nav-sub-item { font-size:13px; }
-    .sidebar-footer { padding:var(--space-4); border-top:1px solid var(--color-border); }
-    .user-row { display:flex; align-items:center; gap:var(--space-3); }
-    .user-row__name { font-size:var(--text-sm); font-weight:500; }
-    .user-row__role { font-size:var(--text-xs); color:var(--color-text-muted); }
-    .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
-    .topbar { height:var(--topbar-height); background:var(--color-surface); border-bottom:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; padding:0 var(--space-6); flex-shrink:0; gap:var(--space-4); }
-    .breadcrumb { display:flex; align-items:center; gap:var(--space-2); font-size:var(--text-sm); }
-    .breadcrumb a { color:var(--color-text-muted); text-decoration:none; }
-    .breadcrumb a:hover { color:var(--color-text); }
-    .breadcrumb-sep { color:var(--color-border); }
-    .breadcrumb-current { font-weight:500; }
-    .topbar-right { display:flex; align-items:center; gap:var(--space-3); }
-    .topbar-avatar-btn { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-1) var(--space-2); background:none; border:1px solid transparent; border-radius:var(--radius); cursor:pointer; transition:all var(--transition); }
-    .topbar-avatar-btn:hover { background:var(--color-bg); border-color:var(--color-border); }
-    .topbar-name { font-size:var(--text-sm); font-weight:500; }
-    .main-content { flex:1; overflow-y:auto; padding:var(--space-8); }
+  <link rel="stylesheet" href="../styles/layout.css">
+  <link rel="stylesheet" href="projects.css">
 
-    /* Page-specific */
-    .projects-toolbar {
-      display: flex;
-      align-items: center;
-      gap: var(--space-4);
-      margin-bottom: var(--space-5);
-      flex-wrap: wrap;
-    }
-
-    .projects-toolbar .input-search { width: 280px; }
-
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: var(--space-4);
-      margin-top: var(--space-5);
-    }
-
-    .project-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: var(--space-5);
-      cursor: pointer;
-      transition: border-color var(--transition), box-shadow var(--transition);
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
-
-    .project-card:hover {
-      border-color: var(--color-accent);
-      box-shadow: var(--shadow);
-      text-decoration: none;
-    }
-
-    .project-card__header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: var(--space-3);
-      margin-bottom: var(--space-3);
-    }
-
-    .project-card__type {
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      padding: 0.2em 0.6em;
-      border-radius: var(--radius-sm);
-      flex-shrink: 0;
-    }
-
-    .type-detection    { background:#e8f3fd; color:#1e6db0; }
-    .type-segmentation { background:#f0eaff; color:#6b3fb0; }
-    .type-classification { background:#eaf3e0; color:#3b6d11; }
-
-    .project-card__name {
-      font-size: var(--text-base);
-      font-weight: 600;
-      margin-bottom: var(--space-1);
-      color: var(--color-text);
-    }
-
-    .project-card__meta {
-      font-size: var(--text-xs);
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-4);
-    }
-
-    .project-card__stats {
-      display: flex;
-      gap: var(--space-4);
-      margin-bottom: var(--space-3);
-    }
-
-    .stat-item { font-size: var(--text-xs); color: var(--color-text-muted); }
-    .stat-item strong { display: block; font-size: var(--text-sm); color: var(--color-text); font-weight: 600; }
-
-    .project-card__progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: var(--text-xs);
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-1);
-    }
-
-  </style>
 </head>
 <body>
 <div class="app-shell">
@@ -157,10 +25,7 @@
         <span class="breadcrumb-current">Dự án</span>
       </nav>
       <div class="topbar-right">
-        <button class="topbar-avatar-btn">
-          <div class="avatar avatar-sm" style="background:#5a8a3a;">NA</div>
-          <span class="topbar-name">Nguyễn Admin</span>
-        </button>
+        <div id="topbar-user"></div>
       </div>
     </header>
 
@@ -369,18 +234,8 @@
   </div>
 </div>
 
-<script>
-  function filterChip(el) {
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-  }
-
-  // Role simulation
-  const role = new URLSearchParams(location.search).get('role') || 'admin';
-  if (role !== 'admin') {
-    document.getElementById('adminActions').style.display = 'none';
-  }
-</script>
+<script src="projects.js"></script>
   <script src="../components/sidebar.js"></script>
+  <script src="../components/topbar.js"></script>
 </body>
 </html>

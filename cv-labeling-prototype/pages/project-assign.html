@@ -6,93 +6,9 @@
   <title>CVLabel — Phân công ảnh</title>
   <link rel="stylesheet" href="../styles/base.css">
   <link rel="stylesheet" href="../styles/components.css">
-  <style>
-    .app-shell { display:flex; height:100vh; overflow:hidden; }
-    .sidebar { width:var(--sidebar-width); height:100vh; background:var(--color-surface); border-right:1px solid var(--color-border); display:flex; flex-direction:column; flex-shrink:0; }
-    .sidebar-logo { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-4); height:var(--topbar-height); border-bottom:1px solid var(--color-border); }
-    .sidebar-logo__icon { width:28px; height:28px; background:var(--color-accent); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; }
-    .sidebar-logo__icon svg { color:white; width:16px; height:16px; }
-    .sidebar-logo__text { font-family:var(--font-heading); font-size:var(--text-lg); font-weight:600; }
-    .sidebar-nav { flex:1; overflow-y:auto; padding:var(--space-3) 0; }
-    .nav-section-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--color-text-muted); padding:var(--space-2) var(--space-4); }
-    .nav-item { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-2) var(--space-4); font-size:var(--text-sm); font-weight:500; color:var(--color-text-muted); text-decoration:none; transition:all var(--transition); }
-    .nav-item svg { width:18px; height:18px; flex-shrink:0; }
-    .nav-item:hover { background:var(--color-bg); color:var(--color-text); text-decoration:none; }
-    .nav-item.active { background:var(--color-accent-light); color:var(--color-accent); }
-    .nav-group { margin-bottom:2px; }
-    .nav-group-hd { display:flex; align-items:center; gap:6px; width:100%; padding:5px var(--space-3); background:none; border:none; cursor:pointer; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--color-text-muted); border-radius:var(--radius-sm); text-align:left; transition:background var(--transition),color var(--transition); }
-    .nav-group-hd:hover { background:var(--color-bg); color:var(--color-text); }
-    .nav-group-chevron { margin-left:auto; transition:transform .15s; flex-shrink:0; }
-    .nav-group-hd.collapsed .nav-group-chevron { transform:rotate(-90deg); }
-    .nav-group-bd { padding-bottom:var(--space-2); }
-    .nav-group-bd.hidden { display:none; }
-    .nav-sub { margin:2px 0; }
-    .nav-sub-hd { display:flex; align-items:center; gap:var(--space-3); width:100%; padding:var(--space-2) var(--space-3); background:none; border:none; cursor:pointer; font-size:var(--text-sm); color:var(--color-text); border-radius:var(--radius-sm); text-align:left; transition:background var(--transition),color var(--transition); }
-    .nav-sub-hd:hover { background:var(--color-bg); color:var(--color-text); }
-    .nav-sub-hd svg { width:18px; height:18px; flex-shrink:0; }
-    .nav-sub-chevron { margin-left:auto; transition:transform .15s; flex-shrink:0; }
-    .nav-sub-hd.collapsed .nav-sub-chevron { transform:rotate(-90deg); }
-    .nav-sub-bd { padding-left:var(--space-4); padding-bottom:var(--space-1); }
-    .nav-sub-bd.hidden { display:none; }
-    .nav-sub-item { font-size:13px; }
-    .sidebar-footer { padding:var(--space-4); border-top:1px solid var(--color-border); }
-    .user-row { display:flex; align-items:center; gap:var(--space-3); }
-    .user-row__name { font-size:var(--text-sm); font-weight:500; }
-    .user-row__role { font-size:var(--text-xs); color:var(--color-text-muted); }
-    .main-area { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
-    .topbar { height:var(--topbar-height); background:var(--color-surface); border-bottom:1px solid var(--color-border); display:flex; align-items:center; justify-content:space-between; padding:0 var(--space-6); flex-shrink:0; }
-    .breadcrumb { display:flex; align-items:center; gap:var(--space-2); font-size:var(--text-sm); }
-    .breadcrumb a { color:var(--color-text-muted); text-decoration:none; }
-    .breadcrumb a:hover { color:var(--color-text); }
-    .breadcrumb-sep { color:var(--color-border); }
-    .breadcrumb-current { font-weight:500; }
-    .topbar-right { display:flex; align-items:center; gap:var(--space-3); }
-    .topbar-avatar-btn { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-1) var(--space-2); background:none; border:1px solid transparent; border-radius:var(--radius); cursor:pointer; transition:all var(--transition); }
-    .topbar-avatar-btn:hover { background:var(--color-bg); border-color:var(--color-border); }
-    .topbar-name { font-size:var(--text-sm); font-weight:500; }
-    .main-content { flex:1; overflow-y:auto; padding:var(--space-8); }
+  <link rel="stylesheet" href="../styles/layout.css">
+  <link rel="stylesheet" href="project-assign.css">
 
-    /* Summary bar */
-    .summary-bar {
-      background: var(--color-accent-light);
-      border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
-      border-radius: var(--radius-md);
-      padding: var(--space-4) var(--space-5);
-      display: flex;
-      align-items: center;
-      gap: var(--space-6);
-      margin-bottom: var(--space-6);
-      flex-wrap: wrap;
-    }
-
-    .summary-stat { text-align: center; }
-    .summary-stat__val { font-size: var(--text-xl); font-weight: 600; font-family: var(--font-heading); color: var(--color-accent); }
-    .summary-stat__label { font-size: var(--text-xs); color: var(--color-text-muted); }
-
-    /* Annotator row state */
-    .overdue-row td { background: color-mix(in srgb, var(--color-pending) 8%, transparent) !important; }
-
-    .quota-bar {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      min-width: 140px;
-    }
-
-    .assign-input {
-      width: 64px;
-      height: 30px;
-      text-align: center;
-      padding: 0 8px;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius);
-      font-size: var(--text-sm);
-      background: var(--color-surface);
-      color: var(--color-text);
-    }
-
-    .assign-input:focus { outline: none; border-color: var(--color-accent); }
-  </style>
 </head>
 <body>
 <div class="app-shell">
@@ -110,10 +26,7 @@
         <span class="breadcrumb-current">Phân công</span>
       </nav>
       <div class="topbar-right">
-        <button class="topbar-avatar-btn">
-          <div class="avatar avatar-sm" style="background:#5a8a3a;">NA</div>
-          <span class="topbar-name">Nguyễn Admin</span>
-        </button>
+        <div id="topbar-user"></div>
       </div>
     </header>
 
@@ -358,16 +271,8 @@
 
 <div class="toast-container" id="toastContainer"></div>
 
-<script>
-  function showToast(msg, type = '') {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type ? 'toast-' + type : ''}`;
-    toast.textContent = msg;
-    container.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 3000);
-  }
-</script>
+<script src="project-assign.js"></script>
   <script src="../components/sidebar.js"></script>
+  <script src="../components/topbar.js"></script>
 </body>
 </html>

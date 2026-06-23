@@ -1,0 +1,86 @@
+.projects-toolbar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-5);
+      flex-wrap: wrap;
+    }
+
+    .projects-toolbar .input-search { width: 280px; }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+
+    .project-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      cursor: pointer;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .project-card:hover {
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow);
+      text-decoration: none;
+    }
+
+    .project-card__header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+
+    .project-card__type {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding: 0.2em 0.6em;
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
+    }
+
+    .type-detection    { background:#e8f3fd; color:#1e6db0; }
+    .type-segmentation { background:#f0eaff; color:#6b3fb0; }
+    .type-classification { background:#eaf3e0; color:#3b6d11; }
+
+    .project-card__name {
+      font-size: var(--text-base);
+      font-weight: 600;
+      margin-bottom: var(--space-1);
+      color: var(--color-text);
+    }
+
+    .project-card__meta {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-4);
+    }
+
+    .project-card__stats {
+      display: flex;
+      gap: var(--space-4);
+      margin-bottom: var(--space-3);
+    }
+
+    .stat-item { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .stat-item strong { display: block; font-size: var(--text-sm); color: var(--color-text); font-weight: 600; }
+
+    .project-card__progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-1);
+    }

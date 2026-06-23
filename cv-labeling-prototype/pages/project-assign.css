@@ -1,0 +1,39 @@
+.summary-bar {
+      background: var(--color-accent-light);
+      border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+      border-radius: var(--radius-md);
+      padding: var(--space-4) var(--space-5);
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+      margin-bottom: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .summary-stat { text-align: center; }
+    .summary-stat__val { font-size: var(--text-xl); font-weight: 600; font-family: var(--font-heading); color: var(--color-accent); }
+    .summary-stat__label { font-size: var(--text-xs); color: var(--color-text-muted); }
+
+    /* Annotator row state */
+    .overdue-row td { background: color-mix(in srgb, var(--color-pending) 8%, transparent) !important; }
+
+    .quota-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      min-width: 140px;
+    }
+
+    .assign-input {
+      width: 64px;
+      height: 30px;
+      text-align: center;
+      padding: 0 8px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      font-size: var(--text-sm);
+      background: var(--color-surface);
+      color: var(--color-text);
+    }
+
+    .assign-input:focus { outline: none; border-color: var(--color-accent); }

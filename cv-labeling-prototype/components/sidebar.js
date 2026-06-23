@@ -19,7 +19,7 @@
 
   var html = `
 <div class="sidebar-logo" style="gap:10px;">
-  <img src="../components/logo.svg" alt="ASI" style="height:26px;width:auto;flex-shrink:0;display:block;">
+  <img src="../assets/logo.svg" alt="ASI" style="height:26px;width:auto;flex-shrink:0;display:block;">
   <span class="sidebar-logo__text" style="font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,0.75);letter-spacing:.06em;line-height:1;">CV Label</span>
 </div>
 <nav class="sidebar-nav">
