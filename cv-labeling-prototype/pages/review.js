@@ -3,6 +3,7 @@
   let currentReviewImg = 'img_0042.jpg';
   let currentFilter = 'all';
   let selectionMode = false;
+  let lastSelectedImg = null;
   const selectedItems = new Set();
 
   const reviewStatuses = {
@@ -92,7 +93,7 @@
     });
     updateReviewCount();
     // Clear selection when filter changes
-    if (selectionMode) { selectedItems.clear(); syncCheckboxes(); updateBulkBar(); }
+    if (selectionMode) clearSelection();
   }
 
   function updateReviewCount() {
@@ -104,12 +105,10 @@
 
   // ─── Image navigation ───────────────────────────────────────────────────────
 
-  function selectReviewImage(imgName) {
+  function selectReviewImage(imgName, event) {
     // In selection mode: toggle checkbox instead of navigating
     if (selectionMode) {
-      const item = document.querySelector(`.img-list-item[data-img="${imgName}"]`);
-      const cb = item?.querySelector('.sel-cb');
-      if (cb) { cb.checked = !cb.checked; toggleItemSelection(imgName, cb.checked); }
+      toggleSelectionFromItem(imgName, event);
       return;
     }
     if (imgName === currentReviewImg) return;
@@ -148,26 +147,84 @@
     btn.style.borderColor = selectionMode ? 'var(--cv-accent)' : '';
     document.getElementById('panelNav').style.display = selectionMode ? 'none' : '';
     document.getElementById('bulkBar').classList.toggle('visible', selectionMode);
-    if (!selectionMode) { selectedItems.clear(); syncCheckboxes(); updateBulkBar(); }
+    if (!selectionMode) clearSelection();
   }
 
   function toggleItemSelection(imgName, checked) {
     if (checked) selectedItems.add(imgName);
     else selectedItems.delete(imgName);
     const item = document.querySelector(`.img-list-item[data-img="${imgName}"]`);
-    if (item) item.classList.toggle('sel-checked', checked);
+    if (item) {
+      item.classList.toggle('sel-checked', checked);
+      const cb = item.querySelector('.sel-cb');
+      if (cb) cb.checked = checked;
+    }
     updateBulkBar();
+  }
+
+  function handleSelectionCheckbox(imgName, checked, event) {
+    event.stopPropagation();
+    if (event.shiftKey) {
+      selectRangeTo(imgName, checked);
+      return;
+    }
+    toggleItemSelection(imgName, checked);
+    lastSelectedImg = imgName;
+  }
+
+  function toggleSelectionFromItem(imgName, event) {
+    const item = document.querySelector(`.img-list-item[data-img="${imgName}"]`);
+    if (!item) return;
+    const shouldSelect = !selectedItems.has(imgName);
+    if (event?.shiftKey) {
+      selectRangeTo(imgName, shouldSelect);
+      return;
+    }
+    toggleItemSelection(imgName, shouldSelect);
+    lastSelectedImg = imgName;
+  }
+
+  function selectRangeTo(imgName, checked) {
+    const visibleItems = Array.from(document.querySelectorAll('.img-list-item'))
+      .filter(item => item.style.display !== 'none');
+    const anchor = lastSelectedImg || imgName;
+    const start = visibleItems.findIndex(item => item.dataset.img === anchor);
+    const end = visibleItems.findIndex(item => item.dataset.img === imgName);
+    if (start === -1 || end === -1) {
+      toggleItemSelection(imgName, checked);
+      lastSelectedImg = imgName;
+      return;
+    }
+    const [from, to] = start < end ? [start, end] : [end, start];
+    visibleItems.slice(from, to + 1).forEach(item => {
+      toggleItemSelection(item.dataset.img, checked);
+    });
+    lastSelectedImg = imgName;
   }
 
   function selectAllVisible() {
     document.querySelectorAll('.img-list-item').forEach(item => {
       if (item.style.display === 'none') return;
       const imgName = item.dataset.img;
-      selectedItems.add(imgName);
-      item.classList.add('sel-checked');
-      const cb = item.querySelector('.sel-cb');
-      if (cb) cb.checked = true;
+      toggleItemSelection(imgName, true);
     });
+    lastSelectedImg = null;
+    updateBulkBar();
+  }
+
+  function selectVisiblePending() {
+    document.querySelectorAll('.img-list-item').forEach(item => {
+      if (item.style.display === 'none' || item.dataset.status !== 'pending') return;
+      toggleItemSelection(item.dataset.img, true);
+    });
+    lastSelectedImg = null;
+    updateBulkBar();
+  }
+
+  function clearSelection() {
+    selectedItems.clear();
+    lastSelectedImg = null;
+    syncCheckboxes();
     updateBulkBar();
   }
 

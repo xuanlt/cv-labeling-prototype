@@ -123,6 +123,10 @@ svg { display: block; }
 .img-list-item.sel-checked { background:var(--cv-active) !important; }
 .bulk-bar { display:none; flex-direction:column; gap:6px; border-top:1px solid var(--cv-border); padding:8px 12px; flex-shrink:0; }
 .bulk-bar.visible { display:flex; }
+.bulk-pick-row { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.bulk-pick-btn { min-width:0; height:26px; border:1px solid var(--cv-border); border-radius:4px; background:var(--cv-toolbar); color:var(--cv-text); cursor:pointer; font-family:inherit; font-size:10px; font-weight:600; }
+.bulk-pick-btn:hover { background:var(--cv-hover); }
+.bulk-hint { font-size:10px; line-height:1.35; color:var(--cv-muted); }
 
 /* ─── Cheatsheet ────────────────────────────────────── */
 .panel-block { border-bottom:1px solid var(--cv-border); }

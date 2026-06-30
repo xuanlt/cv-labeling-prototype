@@ -71,8 +71,8 @@
         </div>
 
         <div class="img-list" id="imgList">
-          <div class="img-list-item" data-img="img_0038.jpg" data-status="approved" onclick="selectReviewImage(this.dataset.img)">
-            <input type="checkbox" class="sel-cb" onclick="event.stopPropagation()" onchange="toggleItemSelection('img_0038.jpg',this.checked)">
+          <div class="img-list-item" data-img="img_0038.jpg" data-status="approved" onclick="selectReviewImage(this.dataset.img, event)">
+            <input type="checkbox" class="sel-cb" onclick="handleSelectionCheckbox('img_0038.jpg', this.checked, event)">
             <div class="img-thumb" style="background:linear-gradient(135deg,#2a3a28,#1e2832);">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </div>
@@ -81,8 +81,8 @@
               <div style="margin-top:2px;"><span class="status-dot approved">Đã duyệt</span></div>
             </div>
           </div>
-          <div class="img-list-item" data-img="img_0039.jpg" data-status="rejected" onclick="selectReviewImage(this.dataset.img)">
-            <input type="checkbox" class="sel-cb" onclick="event.stopPropagation()" onchange="toggleItemSelection('img_0039.jpg',this.checked)">
+          <div class="img-list-item" data-img="img_0039.jpg" data-status="rejected" onclick="selectReviewImage(this.dataset.img, event)">
+            <input type="checkbox" class="sel-cb" onclick="handleSelectionCheckbox('img_0039.jpg', this.checked, event)">
             <div class="img-thumb" style="background:linear-gradient(135deg,#3a2a1e,#2a1e18);">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </div>
@@ -91,8 +91,8 @@
               <div style="margin-top:2px;"><span class="status-dot rejected">Trả lại</span></div>
             </div>
           </div>
-          <div class="img-list-item active" data-img="img_0042.jpg" data-status="pending" onclick="selectReviewImage(this.dataset.img)">
-            <input type="checkbox" class="sel-cb" onclick="event.stopPropagation()" onchange="toggleItemSelection('img_0042.jpg',this.checked)">
+          <div class="img-list-item active" data-img="img_0042.jpg" data-status="pending" onclick="selectReviewImage(this.dataset.img, event)">
+            <input type="checkbox" class="sel-cb" onclick="handleSelectionCheckbox('img_0042.jpg', this.checked, event)">
             <div class="img-thumb" style="background:linear-gradient(135deg,#1a2028,#243040);border:1px solid var(--cv-accent);">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--cv-accent)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </div>
@@ -101,16 +101,16 @@
               <div style="margin-top:2px;"><span class="status-dot pending">Chờ duyệt</span></div>
             </div>
           </div>
-          <div class="img-list-item" data-img="img_0043.jpg" data-status="pending" onclick="selectReviewImage(this.dataset.img)">
-            <input type="checkbox" class="sel-cb" onclick="event.stopPropagation()" onchange="toggleItemSelection('img_0043.jpg',this.checked)">
+          <div class="img-list-item" data-img="img_0043.jpg" data-status="pending" onclick="selectReviewImage(this.dataset.img, event)">
+            <input type="checkbox" class="sel-cb" onclick="handleSelectionCheckbox('img_0043.jpg', this.checked, event)">
             <div class="img-thumb"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
             <div style="flex:1;min-width:0;">
               <div class="img-list-item__name">img_0043.jpg</div>
               <div style="margin-top:2px;"><span class="status-dot pending">Chờ duyệt</span></div>
             </div>
           </div>
-          <div class="img-list-item" data-img="img_0044.jpg" data-status="pending" onclick="selectReviewImage(this.dataset.img)">
-            <input type="checkbox" class="sel-cb" onclick="event.stopPropagation()" onchange="toggleItemSelection('img_0044.jpg',this.checked)">
+          <div class="img-list-item" data-img="img_0044.jpg" data-status="pending" onclick="selectReviewImage(this.dataset.img, event)">
+            <input type="checkbox" class="sel-cb" onclick="handleSelectionCheckbox('img_0044.jpg', this.checked, event)">
             <div class="img-thumb"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
             <div style="flex:1;min-width:0;">
               <div class="img-list-item__name">img_0044.jpg</div>
@@ -137,8 +137,13 @@
         <div id="bulkBar" class="bulk-bar">
           <div style="display:flex;align-items:center;justify-content:space-between;">
             <span id="bulkInfo" style="font-size:11px;color:var(--cv-muted);">0 ảnh đã chọn</span>
-            <button onclick="selectAllVisible()" style="background:none;border:none;font-size:10px;font-weight:600;color:var(--cv-accent);cursor:pointer;padding:0;font-family:inherit;">Chọn tất cả</button>
+            <button onclick="clearSelection()" style="background:none;border:none;font-size:10px;font-weight:600;color:var(--cv-muted);cursor:pointer;padding:0;font-family:inherit;">Bỏ chọn</button>
           </div>
+          <div class="bulk-pick-row">
+            <button class="bulk-pick-btn" onclick="selectAllVisible()">Tất cả đang lọc</button>
+            <button class="bulk-pick-btn" onclick="selectVisiblePending()">Chờ duyệt</button>
+          </div>
+          <div class="bulk-hint">Shift-click để chọn một dải file liên tiếp.</div>
           <div style="display:flex;gap:6px;">
             <button class="ebtn ebtn-approve" style="flex:1;justify-content:center;" onclick="bulkApprove()">
               <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
