@@ -10,3 +10,15 @@ function showToast(msg, type = '') {
   function copyCmd(cmd) {
     navigator.clipboard?.writeText(cmd).then(() => showToast('Đã sao chép: ' + cmd));
   }
+
+  function createVersion() {
+    showToast('Đã tạo v4 từ ảnh đã duyệt, labels/schema, split và cấu hình export hiện tại', 'success');
+  }
+
+  function setMainVersion(version) {
+    showToast(`Đã đặt ${version} làm phiên bản chính cho export/training mặc định`, 'success');
+  }
+
+  function restoreVersion(version) {
+    showToast(`Đã tạo bản nháp khôi phục từ ${version}; dữ liệu hiện tại chưa bị ghi đè`);
+  }

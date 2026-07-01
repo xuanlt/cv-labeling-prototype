@@ -103,6 +103,12 @@
           <span class="chip" onclick="filterProj('done',this)">Hoàn thành (1)</span>
         </div>
 
+        <div class="status-rule">
+          <div><strong>Đúng tiến độ</strong>: chưa quá hạn và tiến độ duyệt thực tế không thấp hơn tiến độ kỳ vọng quá 15%.</div>
+          <div><strong>Có rủi ro</strong>: còn deadline nhưng tốc độ hiện tại dự báo không kịp, hoặc backlog chờ duyệt tăng mạnh.</div>
+          <div><strong>Trễ deadline</strong>: đã qua deadline nhưng chưa đạt 100% ảnh được duyệt.</div>
+        </div>
+
         <div class="card" style="padding:0;overflow:hidden;">
           <div style="padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;">
             <span class="card-title">Tiến độ theo dự án</span>
@@ -149,7 +155,7 @@
                   <div class="dl-ok">30/06/2026</div>
                   <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">còn 19 ngày</div>
                 </td>
-                <td><span class="badge badge-approved">Đúng tiến độ</span></td>
+                <td><span class="badge badge-approved" title="70% thực tế >= tiến độ kỳ vọng trong ngưỡng 15%">Đúng tiến độ</span></td>
               </tr>
 
               <tr>
@@ -177,7 +183,7 @@
                   <div class="dl-ok">15/07/2026</div>
                   <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">còn 34 ngày</div>
                 </td>
-                <td><span class="badge badge-approved">Đúng tiến độ</span></td>
+                <td><span class="badge badge-approved" title="57% thực tế >= tiến độ kỳ vọng trong ngưỡng 15%">Đúng tiến độ</span></td>
               </tr>
 
               <tr>
@@ -232,7 +238,7 @@
                   <div class="dl-warn">25/06/2026</div>
                   <div style="font-size:10px;color:var(--color-pending);margin-top:2px;">⚠ còn 14 ngày</div>
                 </td>
-                <td><span class="badge badge-pending">Có rủi ro</span></td>
+                <td><span class="badge badge-pending" title="47% thực tế thấp hơn tiến độ kỳ vọng; còn 14 ngày và backlog chưa làm cao">Có rủi ro</span></td>
               </tr>
 
               <tr>
@@ -260,7 +266,7 @@
                   <div class="dl-ok">20/07/2026</div>
                   <div style="font-size:10px;color:var(--color-text-muted);margin-top:2px;">còn 39 ngày</div>
                 </td>
-                <td><span class="badge badge-approved">Đúng tiến độ</span></td>
+                <td><span class="badge badge-approved" title="65% thực tế >= tiến độ kỳ vọng trong ngưỡng 15%">Đúng tiến độ</span></td>
               </tr>
 
               <tr style="background:rgba(192,57,43,0.04);">
@@ -288,7 +294,7 @@
                   <div class="dl-over">10/06/2026</div>
                   <div style="font-size:10px;color:var(--color-danger);margin-top:2px;">✕ trễ 1 ngày</div>
                 </td>
-                <td><span class="badge badge-danger">Trễ deadline</span></td>
+                <td><span class="badge badge-danger" title="Đã qua deadline 10/06/2026 và mới duyệt 68/420 ảnh">Trễ deadline</span></td>
               </tr>
 
             </tbody>

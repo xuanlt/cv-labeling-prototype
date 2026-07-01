@@ -38,11 +38,12 @@ let toastTimer;
 
   function openInviteModal() {
     document.getElementById('modal-invite').classList.add('open');
+    document.getElementById('invite-name').value = '';
     document.getElementById('invite-email').value = '';
     document.getElementById('invite-note').value = '';
     pendingInvites.length = 0;
     renderInviteList();
-    setTimeout(() => document.getElementById('invite-email').focus(), 50);
+    setTimeout(() => document.getElementById('invite-name').focus(), 50);
   }
 
   function addInviteEmail() {
@@ -72,6 +73,7 @@ let toastTimer;
   }
 
   function confirmInvite() {
+    const name = document.getElementById('invite-name').value.trim();
     const email = document.getElementById('invite-email').value.trim();
     if (email && email.includes('@')) pendingInvites.push(email);
     if (pendingInvites.length === 0) {
@@ -80,7 +82,7 @@ let toastTimer;
     }
     const count = pendingInvites.length;
     document.getElementById('modal-invite').classList.remove('open');
-    showToast(`Đã gửi lời mời đến ${count} người dùng`);
+    showToast(count === 1 && name ? `Đã gửi lời mời đến ${name}` : `Đã gửi lời mời đến ${count} người dùng`);
   }
 
   /* ── Deactivate ── */

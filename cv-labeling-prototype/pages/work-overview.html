@@ -27,10 +27,10 @@
 
       <!-- Greeting -->
       <p class="greeting">Xin chào, Trần Bình 👋</p>
-      <p class="text-muted text-sm" style="margin-bottom:var(--space-6);">Thứ Hai, 09/06/2026 · 12 ảnh cần gắn nhãn &nbsp;·&nbsp; <span style="color:#b45309;font-weight:500;">7 ảnh chờ duyệt</span></p>
+      <p class="text-muted text-sm" style="margin-bottom:var(--space-6);">Thứ Hai, 09/06/2026 · <span data-role-copy="annotator">12 ảnh cần gắn nhãn</span><span data-role-copy="reviewer">7 ảnh chờ duyệt</span><span data-role-copy="hybrid">12 ảnh cần gắn nhãn &nbsp;·&nbsp; <span style="color:#b45309;font-weight:500;">7 ảnh chờ duyệt</span></span></p>
 
       <!-- CTA Reviewer -->
-      <div class="cta-card review-cta" style="margin-bottom:var(--space-3);">
+      <div class="cta-card review-cta reviewer-only hybrid-only" style="margin-bottom:var(--space-3);">
         <div class="cta-card__text">
           <div class="cta-card__title">🔍 Tiếp tục duyệt</div>
           <div class="cta-card__sub">img_0050.jpg · License Plate Detection v2 · Gửi bởi Nguyễn An</div>
@@ -42,7 +42,7 @@
       </div>
 
       <!-- CTA Annotator -->
-      <div class="cta-card">
+      <div class="cta-card annotator-only hybrid-only">
         <div class="cta-card__text">
           <div class="cta-card__title">▶ Tiếp tục gắn nhãn</div>
           <div class="cta-card__sub">img_0042.jpg · License Plate Detection v2</div>
@@ -167,12 +167,12 @@
       </div>
 
       <!-- Queue — section title -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3);">
+      <div class="annotator-only hybrid-only" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-3);">
         <h2 style="font-size:var(--text-base);font-weight:600;font-family:var(--font-heading);">Queue theo dự án</h2>
         <span class="text-sm text-muted">80 ảnh · 2 dự án</span>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);align-items:start;">
+      <div class="annotator-only hybrid-only" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);align-items:start;">
 
         <!-- Card: License Plate Detection v2 -->
         <div class="card">
@@ -264,18 +264,22 @@
       </div>
 
       <!-- Review Queue -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:var(--space-8);margin-bottom:var(--space-3);">
+      <div class="reviewer-only hybrid-only" style="display:flex;align-items:center;justify-content:space-between;margin-top:var(--space-8);margin-bottom:var(--space-3);">
         <h2 style="font-size:var(--text-base);font-weight:600;font-family:var(--font-heading);display:flex;align-items:center;gap:var(--space-2);">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           Hàng chờ duyệt
         </h2>
         <div style="display:flex;align-items:center;gap:var(--space-3);">
           <span class="text-sm text-muted">7 ảnh · 2 dự án</span>
+          <button class="btn btn-primary btn-sm" onclick="confirmBulkApprove()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Duyệt tất cả
+          </button>
           <a href="review.html" class="btn btn-secondary btn-sm">Xem tất cả</a>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card reviewer-only hybrid-only">
         <!-- Header -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;border-bottom:1px solid var(--color-border);margin-bottom:0;">
           <div style="padding:var(--space-3) var(--space-4);border-right:1px solid var(--color-border);">
@@ -314,6 +318,7 @@
             </div>
           </div>
           <div class="review-actions">
+            <button class="btn btn-sm btn-secondary" onclick="quickPreview('img_0050.jpg')">Phóng to</button>
             <a href="review.html" class="btn btn-sm btn-approve">Duyệt</a>
             <a href="review.html" class="btn btn-sm btn-ghost" style="color:var(--color-danger);">Trả lại</a>
           </div>
@@ -336,6 +341,7 @@
             </div>
           </div>
           <div class="review-actions">
+            <button class="btn btn-sm btn-secondary" onclick="quickPreview('pot_0122.jpg')">Phóng to</button>
             <a href="review.html" class="btn btn-sm btn-approve">Duyệt</a>
             <a href="review.html" class="btn btn-sm btn-ghost" style="color:var(--color-danger);">Trả lại</a>
           </div>
@@ -358,6 +364,7 @@
             </div>
           </div>
           <div class="review-actions">
+            <button class="btn btn-sm btn-secondary" onclick="quickPreview('img_0047.jpg')">Phóng to</button>
             <a href="review.html" class="btn btn-sm btn-approve">Duyệt</a>
             <a href="review.html" class="btn btn-sm btn-ghost" style="color:var(--color-danger);">Trả lại</a>
           </div>

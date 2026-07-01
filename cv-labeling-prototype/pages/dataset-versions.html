@@ -22,7 +22,7 @@
         <span class="breadcrumb-current">Dataset Versions</span>
       </nav>
       <div class="topbar-right">
-        <button class="btn btn-primary btn-sm" onclick="showToast('Đã tạo phiên bản v4','success')">
+        <button class="btn btn-primary btn-sm" onclick="createVersion()">
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Tạo version mới
         </button>
@@ -34,6 +34,18 @@
       <div class="page-header">
         <h1 class="page-title">Dataset Versions</h1>
         <span class="text-sm text-muted">License Plate Detection v2 · DVC managed</span>
+      </div>
+
+      <div class="version-explainer">
+        <div>
+          <div class="version-explainer__title">Version là snapshot dataset đã duyệt</div>
+          <div class="version-explainer__text">Mỗi version đóng băng ảnh, annotations, labels/schema, split train/val/test và cấu hình export tại thời điểm tạo. AI team dùng version để training lặp lại được và rollback an toàn khi dataset có lỗi.</div>
+        </div>
+        <div class="version-explainer__flow">
+          <span>Approved images</span>
+          <span>Snapshot</span>
+          <span>DVC artifact</span>
+        </div>
       </div>
 
       <div class="timeline">
@@ -51,7 +63,7 @@
                 <span class="badge badge-approved" style="font-size:10px;">Phiên bản chính</span>
               </div>
               <div class="version-actions">
-                <button class="btn btn-secondary btn-sm" onclick="showToast('Đã khôi phục về v3')">Khôi phục</button>
+                <button class="btn btn-secondary btn-sm" onclick="restoreVersion('v3')">Khôi phục</button>
               </div>
             </div>
             <div class="version-meta">
@@ -83,8 +95,8 @@
             <div class="version-header">
               <div class="version-title">Version 2</div>
               <div class="version-actions">
-                <button class="btn btn-secondary btn-sm" onclick="showToast('Đã đặt v2 làm phiên bản chính')">Đặt làm chính</button>
-                <button class="btn btn-ghost btn-sm" onclick="showToast('Đã khôi phục về v2')">Khôi phục</button>
+                <button class="btn btn-secondary btn-sm" onclick="setMainVersion('v2')">Đặt làm chính</button>
+                <button class="btn btn-ghost btn-sm" onclick="restoreVersion('v2')">Khôi phục</button>
               </div>
             </div>
             <div class="version-meta">
@@ -115,8 +127,8 @@
             <div class="version-header">
               <div class="version-title">Version 1 <span class="text-muted text-sm font-medium" style="font-family:var(--font-body);">— Khởi đầu</span></div>
               <div class="version-actions">
-                <button class="btn btn-secondary btn-sm" onclick="showToast('Đã đặt v1 làm phiên bản chính')">Đặt làm chính</button>
-                <button class="btn btn-ghost btn-sm">Khôi phục</button>
+                <button class="btn btn-secondary btn-sm" onclick="setMainVersion('v1')">Đặt làm chính</button>
+                <button class="btn btn-ghost btn-sm" onclick="restoreVersion('v1')">Khôi phục</button>
               </div>
             </div>
             <div class="version-meta">

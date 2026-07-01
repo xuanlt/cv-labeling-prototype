@@ -1,3 +1,36 @@
+/* ── Project header ── */
+    .project-header { margin-bottom: var(--space-6); }
+    .project-header__top { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-4); margin-bottom:var(--space-4); flex-wrap:wrap; }
+    .project-header__info { flex:1; min-width:0; }
+    .project-type-chip { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; padding:0.25em 0.7em; border-radius:var(--radius-sm); background:#e8f3fd; color:#1e6db0; display:inline-block; margin-bottom:var(--space-2); }
+    .project-title { font-size:var(--text-2xl); font-weight:600; margin-bottom:var(--space-2); }
+    .project-desc { font-size:var(--text-sm); color:var(--color-text-muted); max-width:60ch; }
+
+    /* ── Metrics row ── */
+    .metrics-row { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--space-4); margin-bottom:var(--space-6); }
+    @media (max-width:900px) { .metrics-row { grid-template-columns:repeat(2,1fr); } }
+
+    /* ── Tab content (show/hide) ── */
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+
+    /* ── Overview tab ── */
+    .overview-grid { display:grid; grid-template-columns:1fr 300px; gap:var(--space-6); }
+    @media (max-width:900px) { .overview-grid { grid-template-columns:1fr; } }
+
+    /* ── Label list (overview sidebar) ── */
+    .label-list { display:flex; flex-direction:column; gap:var(--space-2); }
+    .label-item { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-2) var(--space-3); background:var(--color-bg); border-radius:var(--radius); font-size:var(--text-sm); }
+    .label-color { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+    .label-count { margin-left:auto; font-size:var(--text-xs); color:var(--color-text-muted); font-weight:500; }
+
+    /* ── Member list (overview sidebar) ── */
+    .member-list { display:flex; flex-direction:column; gap:var(--space-3); }
+    .member-item { display:flex; align-items:center; gap:var(--space-3); font-size:var(--text-sm); }
+    .member-item__info { flex:1; min-width:0; }
+    .member-item__name { font-weight:500; }
+    .member-item__role { font-size:var(--text-xs); color:var(--color-text-muted); }
+
 .timeline-item {
       display: flex;
       gap: var(--space-3);

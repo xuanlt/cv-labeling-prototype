@@ -65,7 +65,23 @@
     .project-card__meta {
       font-size: var(--text-xs);
       color: var(--color-text-muted);
-      margin-bottom: var(--space-4);
+      margin-bottom: var(--space-2);
+    }
+
+    .project-card__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      margin-bottom: var(--space-3);
+    }
+
+    .project-card__tags span {
+      font-size: 10px;
+      color: var(--color-text-muted);
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      padding: 2px 7px;
     }
 
     .project-card__stats {

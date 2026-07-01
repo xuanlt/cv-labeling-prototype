@@ -1,8 +1,25 @@
-.version-item {
+    .version-item {
       display: flex;
       gap: var(--space-5);
       position: relative;
     }
+
+    .version-explainer {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-5);
+      align-items: flex-start;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4) var(--space-5);
+      margin-bottom: var(--space-6);
+    }
+
+    .version-explainer__title { font-weight: 600; margin-bottom: var(--space-1); }
+    .version-explainer__text { font-size: var(--text-sm); color: var(--color-text-muted); max-width: 72ch; line-height: 1.6; }
+    .version-explainer__flow { display: flex; gap: var(--space-2); flex-wrap: wrap; flex-shrink: 0; }
+    .version-explainer__flow span { font-size: 11px; color: var(--color-accent); background: var(--color-surface); border: 1px solid color-mix(in srgb, var(--color-accent) 25%, var(--color-border)); border-radius: var(--radius-full); padding: 3px 9px; }
 
     .version-item:not(:last-child)::after {
       content: '';
